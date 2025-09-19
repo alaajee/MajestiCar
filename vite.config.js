@@ -1,8 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: process.env.NODE_ENV === 'production' ? '/MugiWash/' : '/src/main.jsx',
+  base: '/MugiWash/', // Important: doit correspondre au nom de votre repo
+  build: {
+    outDir: 'dist',
+  },
 })
