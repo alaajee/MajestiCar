@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import image1 from './assets/Photodecouv.jpeg'
+import image2 from './assets/MugiWash.jpg'
 import './App.css'
 
 function App() {
@@ -12,10 +13,13 @@ function App() {
       </div>
       <header className="App-header">
         <div className="menu-container">
+          <img src={image2} alt="Logo MugiWash" className="menu-logo" />
+
           <div className="menu-item">Home</div>
           <div className="menu-item">A propos</div>
           <div className="menu-item">Services</div>
           <div className="menu-item">Contact</div>
+         
         </div>
       </header>
       <div className="Photo">

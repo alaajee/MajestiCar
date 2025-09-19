@@ -91,6 +91,28 @@ html, body {
   background-color: #7ec9cf;
 }
 
+.menu-logo-container {
+  display: flex;
+  align-items: center;      /* centre verticalement le menu et le logo */
+  justify-content: space-between; /* menu à gauche, logo à droite */
+  padding: 0 20px;          /* un peu d’espace sur les côtés */
+}
+
+.menu-container {
+  display: flex;
+  gap: 20px;               /* espace entre les items du menu */
+}
+
+.menu-item {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.menu-logo {
+  width: 50px;             /* ajuste selon la taille souhaitée */
+  height: auto;
+}
+
 .Photo {
   margin: 0;
   padding: 0;
@@ -111,7 +133,7 @@ html, body {
 /* Slogan sur l'image */
 .image-slogan {
   position: absolute;
-  top: 50%; /* Centre verticalement */
+  top: 35%; /* Centre verticalement */
   left: 50%; /* Centre horizontalement */
   transform: translate(-50%, -50%); /* Centrage parfait horizontal ET vertical */
   max-width: 90%;
