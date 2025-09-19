@@ -1,0 +1,7 @@
+Le client ne doit pas se connecter donc pas une base de données .
+Procédure : 
+Choisir un créneau -> entrer les informations -> payer en ligne ou sur place .
+Entrer les informations ( Y aure le nom - prénom - Adresse - numéro de téléphone - adresse mail )
+
+
+React.js alors 

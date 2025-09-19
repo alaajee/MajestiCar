@@ -1,0 +1,192 @@
+/* Réinitialisation globale pour supprimer TOUTES les marges */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden; /* Empêche le scroll horizontal */
+}
+
+/* Bande bleue avec slogan animé */
+.top-banner {
+  background-color: #85caf6; /* Bleu */
+  width: 100%;
+  padding: 10px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.slogan {
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: underline;
+  animation: slideText 20s linear infinite;
+  white-space: nowrap;
+}
+
+@keyframes slideText {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100vw);
+  }
+}
+
+.App {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background-size: cover;
+  color: white;
+  margin: 0;
+  padding: 0;
+}
+
+.App-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.menu-container {
+  background-color: rgb(169, 234, 238);
+  padding: 15px 30px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  text-align: center;
+  margin: 0;
+  box-sizing: border-box; /* Inclut le padding dans la largeur */
+}
+
+.menu-item {
+  color: rgb(27, 27, 27);
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 18px;
+  padding: 8px 15px;
+  border-radius: 8px;
+  transition: 0.3s ease;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  color: white;
+  background-color: #7ec9cf;
+}
+
+.Photo {
+  margin: 0;
+  padding: 0;
+  display: block;
+  position: relative;
+}
+
+.Photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  vertical-align: top; /* Évite l'espace en bas de l'image */
+  object-fit: cover; /* Assure un bon rendu de l'image */
+}
+
+/* Slogan sur l'image */
+.image-slogan {
+  position: absolute;
+  top: 50%; /* Centre verticalement */
+  left: 50%; /* Centre horizontalement */
+  transform: translate(-50%, -50%); /* Centrage parfait horizontal ET vertical */
+  max-width: 90%;
+  font-size: 4rem;
+  font-weight: 900;
+  text-align: center;
+  line-height: 1.2;
+  letter-spacing: 2px;
+  
+  /* Magnifique dégradé bleu moderne */
+  background: linear-gradient(135deg,
+    #00c6ff, /* Bleu cyan brillant */
+    #0072ff, /* Bleu électrique */
+    #1e3a8a, /* Bleu royal profond */
+    #06b6d4, /* Turquoise */
+    #3b82f6  /* Bleu vif */
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  
+  /* Ombres pour contraste et profondeur */
+  filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.9))
+          drop-shadow(0px 0px 15px rgba(0, 198, 255, 0.4))
+          drop-shadow(0px 0px 25px rgba(59, 130, 246, 0.3));
+  
+  /* Animation fluide du dégradé */
+  animation: colorWave 5s ease-in-out infinite;
+  z-index: 10;
+}
+
+/* Animation des couleurs */
+@keyframes colorWave {
+  0% {
+    background-position: 0% 50%;
+    filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.9))
+            drop-shadow(0px 0px 15px rgba(0, 198, 255, 0.6));
+  }
+  25% {
+    background-position: 25% 25%;
+    filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.9))
+            drop-shadow(0px 0px 20px rgba(0, 114, 255, 0.7));
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.9))
+            drop-shadow(0px 0px 25px rgba(30, 58, 138, 0.6));
+  }
+  75% {
+    background-position: 75% 75%;
+    filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.9))
+            drop-shadow(0px 0px 20px rgba(6, 182, 212, 0.7));
+  }
+  100% {
+    background-position: 0% 50%;
+    filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.9))
+            drop-shadow(0px 0px 15px rgba(59, 130, 246, 0.5));
+  }
+}
+
+/* Responsive pour mobiles */
+@media (max-width: 768px) {
+  .image-slogan {
+    font-size: 2.5rem;
+    letter-spacing: 1px;
+    bottom: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .image-slogan {
+    font-size: 1.8rem;
+    letter-spacing: 0.5px;
+    bottom: 10px;
+    max-width: 95%;
+  }
+}
