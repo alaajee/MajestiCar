@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "homepage": "https://alaajee.github.io/MugiWash",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "gh-pages": "^6.3.0",
