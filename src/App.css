@@ -49,7 +49,7 @@ html, body {
   display: flex;
   flex-direction: column;
   background-size: cover;
-  color: white;
+  color: rgb(0, 0, 0);
   margin: 0;
   padding: 0;
 }
@@ -64,7 +64,7 @@ html, body {
 }
 
 .menu-container {
-  background-color: rgb(169, 234, 238);
+  background-color: rgb(255, 255, 255);
   padding: 15px 30px;
   width: 100%;
   display: flex;
@@ -84,6 +84,7 @@ html, body {
   border-radius: 8px;
   transition: 0.3s ease;
   cursor: pointer;
+  margin-right: auto;
 }
 
 .menu-item:hover {
@@ -108,9 +109,31 @@ html, body {
   font-weight: bold;
 }
 
+.Reserver-button {
+  background-color: rgb(171, 207, 210); /* Bleu vif */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-left: 200px;
+  width: 150px;
+}
+
+.Reserver-button:hover {
+  background-color: #a9b6c4; /* Bleu plus foncé au survol */
+}
+
+.Reserver-buttonn{
+  text-decoration: none;
+}
+
 .menu-logo {
   width: 50px;             /* ajuste selon la taille souhaitée */
   height: auto;
+  margin-right: auto;/* pousse le logo à droite */
 }
 
 .Photo {
@@ -137,7 +160,7 @@ html, body {
   left: 50%; /* Centre horizontalement */
   transform: translate(-50%, -50%); /* Centrage parfait horizontal ET vertical */
   max-width: 90%;
-  font-size: 4rem;
+  font-size: 3rem;
   font-weight: 900;
   text-align: center;
   line-height: 1.2;
@@ -145,7 +168,7 @@ html, body {
   
   /* Magnifique dégradé bleu moderne */
   background: linear-gradient(135deg,
-    #00c6ff, /* Bleu cyan brillant */
+    #a9cad4, /* Bleu cyan brillant */
     #0072ff, /* Bleu électrique */
     #1e3a8a, /* Bleu royal profond */
     #06b6d4, /* Turquoise */
@@ -212,3 +235,154 @@ html, body {
     max-width: 95%;
   }
 }
+
+
+.A_propos {
+  padding: 40px 20px;
+  text-align: center;
+  background-color: #f9f9f9;
+}
+
+.A_propos {
+  padding: 60px 20px;
+  background: white;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.A_propos::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: white;
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.A_propos h2 {
+  font-size: 3rem;
+  margin-bottom: 30px;
+  color: #2c3e50;
+  text-align: center;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(45deg, #a1b4c6, #79bdcf);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.A_propos h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #a9cbce, #adbac8);
+  border-radius: 2px;
+}
+
+.A_propos p {
+  font-size: 1.3rem;
+  line-height: 1.8;
+  color: #34495e;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 20px;
+  box-shadow: 
+      0 20px 60px rgba(0,0,0,0.1),
+      0 8px 25px rgba(0,0,0,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.8);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s ease;
+  text-align: justify;
+}
+
+.A_propos p::before {
+  content: '"';
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  font-size: 4rem;
+  color: #7ec9cf;
+  opacity: 0.3;
+  font-family: serif;
+}
+
+.A_propos p::after {
+  content: '"';
+  position: absolute;
+  bottom: -20px;
+  right: 30px;
+  font-size: 4rem;
+  color: #7ec9cf;
+  opacity: 0.3;
+  font-family: serif;
+}
+
+.A_propos p:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+      0 25px 70px rgba(0,0,0,0.15),
+      0 12px 35px rgba(0,0,0,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+/* Animation d'apparition */
+.A_propos {
+  animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+      opacity: 0;
+      transform: translateY(30px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .A_propos h2 {
+      font-size: 2.2rem;
+  }
+  
+  .A_propos p {
+      font-size: 1.1rem;
+      padding: 25px;
+      margin: 0 15px;
+  }
+}
+
+/* Version alternative avec effet glassmorphism */
+.A_propos-glass p {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
