@@ -68,7 +68,7 @@ function Reserver() {
         return (
             <div className="reservation-container">
                 <header className="reservation-header">
-                    <button onClick={() => window.location.href = '/'} className="back-button">← Retour</button>
+                    <button onClick={() => window.location.href = '/MugiWash'} className="back-button">← Retour</button>
                     <h1>Réservation MugiWash</h1>
                 </header>
 
