@@ -298,7 +298,7 @@ function Reserver() {
                 )}
 
                 <div className="confirmation-actions">
-                    <button onClick={() => window.location.href = '/'} className="home-button">Retour à l'accueil</button>
+                    <button onClick={() => window.location.href = '/MugiWash'} className="home-button">Retour à l'accueil</button>
                     <button onClick={resetForm} className="new-reservation-button">
                         Nouvelle réservation
                     </button>
