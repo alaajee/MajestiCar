@@ -38,9 +38,9 @@ function Reserver() {
         }
 
         const prix = {
-            bronze: '15€',
-            argent: '25€',
-            or: '35€'
+            bronze: '50€',
+            argent: '80€',
+            or: '120€'
         };
 
         alert(`Merci ${formData.nom}, vous avez choisi la formule ${formData.plan.toUpperCase()} (${prix[formData.plan]}). Vous allez être redirigé vers la page de paiement.`);
