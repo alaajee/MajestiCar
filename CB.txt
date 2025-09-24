@@ -1,0 +1,51 @@
+How to integrate a paiement with card in my website ? 
+Stripe : 
+First i should use a backend setup for secuirty measures .
+Example : 
+// server.js
+const express = require('express');
+const stripe = require('stripe')('your-secret-key-here');
+const app = express();
+
+app.use(express.json());
+
+app.post('/create-payment-intent', async (req, res) => {
+  try {
+    const { amount, currency = 'usd' } = req.body;
+    
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount * 100, // Stripe uses cents
+      currency,
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+Second : Install the stripe package with npm install @stripe/stripe-js @stripe/react-stripe-js.
+Third : Main setup -> // App.jsx
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import CheckoutForm from './CheckoutForm';
+
+const stripePromise = loadStripe('your-publishable-key-here');
+
+function App() {
+  return (
+    <Elements stripe={stripePromise}>
+      <CheckoutForm />
+    </Elements>
+  );
+}
+
+Payment from component .
+Stripe Checkout .
+Stripe Fees:
+
+Online payments: 2.9% + $0.30 per transaction
+Example: Customer pays $100
+
+Stripe fee: ($100 × 2.9%) + $0.30 = $3.20
+You receive: $96.80

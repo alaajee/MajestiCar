@@ -1,349 +1,349 @@
 /* Styles pour le système de réservation */
 .reservation-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    min-height: 100vh;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
 }
 
 .reservation-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #7ec9cf;
+  display: block;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #7ec9cf;
 }
 
+
 .back-button {
-    background: #7ec9cf;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-right: 20px;
-    text-decoration: none;
-    display: inline-block;
-    transition: background-color 0.3s ease;
+  background: #7ec9cf;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-right: 20px;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.3s ease;
 }
 
 .back-button:hover {
-    background: #6bb6bd;
+  background: #6bb6bd;
 }
 
 .reservation-header h1 {
-    color: #2c3e50;
-    margin: 0;
-    font-size: 2rem;
+  color: #2c3e50;
+  margin: 0;
+  font-size: 2rem;
 }
 
 .reservation-form {
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
 }
 
 .form-section {
-    margin-bottom: 35px;
+  margin-bottom: 35px;
 }
 
 .form-section h2 {
-    color: #2c3e50;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #e8f4f8;
-    font-size: 1.3rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e8f4f8;
+  font-size: 1.3rem;
 }
 
 .form-row {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
+  display: block;
+  margin-bottom: 20px;
 }
 
 .form-group {
-    flex: 1;
-    margin-bottom: 20px;
+  width: 100%;
+  margin-bottom: 20px;
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 8px;
-    color: #2c3e50;
-    font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+  color: #2c3e50;
+  font-weight: 600;
 }
 
 .form-group input,
 .form-group select {
-    width: 100%;
-    padding: 12px 15px;
-    border: 2px solid #e1e8ed;
-    border-radius: 8px;
-    font-size: 16px;
-    transition: border-color 0.3s ease;
-    box-sizing: border-box;
+  
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
 }
 
 .form-group input:focus,
 .form-group select:focus {
-    outline: none;
-    border-color: #7ec9cf;
+  outline: none;
+  border-color: #7ec9cf;
 }
 
 .payment-options {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .payment-option {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .payment-option input[type="radio"] {
-    display: none;
+  display: none;
 }
 
 .payment-card {
-    display: flex;
-    align-items: center;
-    padding: 20px;
-    border: 2px solid #e1e8ed;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  border: 2px solid #e1e8ed;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
 }
 
 .payment-option input[type="radio"]:checked + .payment-card {
-    border-color: #7ec9cf;
-    background: #e8f4f8;
-    box-shadow: 0 5px 15px rgba(126, 201, 207, 0.2);
+  border-color: #7ec9cf;
+  background: #e8f4f8;
+  box-shadow: 0 5px 15px rgba(126, 201, 207, 0.2);
 }
 
 .payment-icon {
-    font-size: 2rem;
-    margin-right: 15px;
+  font-size: 2rem;
+  margin-right: 15px;
 }
 
 .payment-card strong {
-    display: block;
-    color: #2c3e50;
-    margin-bottom: 5px;
+  display: block;
+  color: #2c3e50;
+  margin-bottom: 5px;
 }
 
 .payment-card p {
-    color: #6c757d;
-    margin: 0;
-    font-size: 0.9rem;
+  color: #6c757d;
+  margin: 0;
+  font-size: 0.9rem;
 }
 
 .submit-button {
-    width: 100%;
-    background: linear-gradient(135deg, #7ec9cf, #6bb6bd);
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 20px;
+  width: 100%;
+  background: linear-gradient(135deg, #7ec9cf, #6bb6bd);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 20px;
 }
 
 .submit-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(126, 201, 207, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(126, 201, 207, 0.4);
 }
 
 /* Styles pour la page de paiement */
 .payment-summary {
-    background: white;
-    padding: 25px;
-    border-radius: 15px;
-    margin-bottom: 25px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .payment-summary h3 {
-    color: #2c3e50;
-    margin-bottom: 15px;
+  color: #2c3e50;
+  margin-bottom: 15px;
 }
 
 .summary-details p {
-    margin: 8px 0;
-    color: #555;
+  margin: 8px 0;
+  color: #555;
 }
 
 .payment-form {
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 .payment-submit-button {
-    width: 100%;
-    background: linear-gradient(135deg, #28a745, #20c997);
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 20px;
+  width: 100%;
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 20px;
 }
 
 .payment-submit-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
 }
 
 /* Styles pour la confirmation */
 .confirmation-card {
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    text-align: center;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-    margin-top: 50px;
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  margin-top: 50px;
 }
 
 .success-icon {
-    font-size: 4rem;
-    margin-bottom: 20px;
+  font-size: 4rem;
+  margin-bottom: 20px;
 }
 
 .confirmation-card h1 {
-    color: #28a745;
-    margin-bottom: 30px;
-    font-size: 2.2rem;
+  color: #28a745;
+  margin-bottom: 30px;
+  font-size: 2.2rem;
 }
 
 .confirmation-details {
-    background: #f8f9fa;
-    padding: 25px;
-    border-radius: 15px;
-    margin: 25px 0;
-    text-align: left;
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 15px;
+  margin: 25px 0;
+  text-align: left;
 }
 
 .confirmation-details h3 {
-    color: #2c3e50;
-    margin-bottom: 20px;
-    text-align: center;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 .detail-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #e1e8ed;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #e1e8ed;
 }
 
 .detail-item:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .detail-item .label {
-    font-weight: 600;
-    color: #2c3e50;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .detail-item .value {
-    color: #555;
-    font-weight: 500;
+  color: #555;
+  font-weight: 500;
 }
 
 .cash-reminder {
-    background: #fff3cd;
-    border: 1px solid #ffeaa7;
-    border-radius: 10px;
-    padding: 15px;
-    margin: 20px 0;
-    color: #856404;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 20px 0;
+  color: #856404;
 }
 
 .cash-reminder p {
-    margin: 0;
-    font-weight: 500;
+  margin: 0;
+  font-weight: 500;
 }
 
 .confirmation-actions {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    margin-top: 30px;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
 }
 
 .home-button,
 .new-reservation-button {
-    padding: 12px 25px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    text-decoration: none;
-    display: inline-block;
-    transition: all 0.3s ease;
-    border: none;
-    font-size: 1rem;
+  padding: 12px 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease;
+  border: none;
+  font-size: 1rem;
 }
 
 .home-button {
-    background: #6c757d;
-    color: white;
+  background: #6c757d;
+  color: white;
 }
 
 .home-button:hover {
-    background: #545b62;
-    transform: translateY(-2px);
+  background: #545b62;
+  transform: translateY(-2px);
 }
 
 .new-reservation-button {
-    background: #7ec9cf;
-    color: white;
+  background: #7ec9cf;
+  color: white;
 }
 
 .new-reservation-button:hover {
-    background: #6bb6bd;
-    transform: translateY(-2px);
+  background: #6bb6bd;
+  transform: translateY(-2px);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .reservation-container {
-        padding: 15px;
-    }
-    
-    .form-row {
-        flex-direction: column;
-        gap: 0;
-    }
-    
-    .confirmation-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .confirmation-card {
-        padding: 25px;
-        margin-top: 20px;
-    }
-    
-    .reservation-header {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .back-button {
-        margin-right: 0;
-        margin-bottom: 15px;
-    }
+  .reservation-container {
+      padding: 15px;
+  }
+  
+  .form-row {
+      display: block;
+  }
+  
+  .confirmation-actions {
+      flex-direction: column;
+      align-items: stretch;
+  }
+  
+  .confirmation-card {
+      padding: 25px;
+      margin-top: 20px;
+  }
+  
+  .reservation-header {
+      flex-direction: column;
+      text-align: center;
+  }
+  
+  .back-button {
+      margin-right: 0;
+      margin-bottom: 15px;
+  }
 }

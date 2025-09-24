@@ -2,6 +2,15 @@ Le client ne doit pas se connecter donc pas une base de données .
 Procédure : 
 Choisir un créneau -> entrer les informations -> payer en ligne ou sur place .
 Entrer les informations ( Y aure le nom - prénom - Adresse - numéro de téléphone - adresse mail )
+Il faut prendre en considération SEO.
+Prebuilt checkout form .
+
+Trois formules :
+1-Formule bronze 50 euros .
+2-Formule argent 80 euros .
+3-Formule or 120 euros .
+
+Create a link , add it to my website -> test .
 
 
 React.js alors 

@@ -293,7 +293,7 @@ html, body {
   transform: translateX(-50%);
   width: 80px;
   height: 4px;
-  background: linear-gradient(90deg, #a9cbce, #adbac8);
+  background: white;
   border-radius: 2px;
 }
 
@@ -379,10 +379,91 @@ html, body {
 
 /* Version alternative avec effet glassmorphism */
 .A_propos-glass p {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgb(255, 255, 255);
   border: 1px solid rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
 
+.mw-cards{
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px){
+  .mw-cards{
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Each card */
+.mw-card{
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 28px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  transform: translateY(30px) scale(0.98);
+  opacity: 0;
+  transition: transform 600ms cubic-bezier(.2,.9,.2,1), opacity 600ms ease, background 220ms ease;
+  cursor: pointer;
+  will-change: transform, opacity;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* visible state (appliquée depuis JS pour l'animation d'apparition) */
+.mw-card.visible{
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+/* hover */
+.mw-card:hover{
+  transform: translateY(-6px) scale(1.03);
+  background: var(--bg-card-hover);
+}
+
+/* Icon */
+.mw-icon{
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+/* small icon animations */
+@keyframes mw-bounce {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+@keyframes mw-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.12); opacity: 0.85; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.mw-icon-bounce { animation: mw-bounce 1.4s infinite; }
+.mw-icon-pulse  { animation: mw-pulse 1.6s infinite; }
+
+/* Title and text */
+.mw-title{
+  font-size: 20px;
+  margin: 6px 0 10px;
+  font-weight: 600;
+}
+.mw-text{
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 15px;
+  margin: 0;
+  flex: 1; /* pour que le texte pousse le bouton bas si besoin */
+}
+
+/* Small fine-tuning: stagger transitions (in case JS fails) */
+.mw-card:nth-child(1){ transition-delay: 0ms; }
+.mw-card:nth-child(2){ transition-delay: 80ms; }
+.mw-card:nth-child(3){ transition-delay: 160ms; }
