@@ -3,6 +3,7 @@ import image1 from './assets/im.jpg'
 import image2 from './assets/logo1.jpeg'
 import { Link } from 'react-router-dom';
 import ContactForm from "./components/ContactForm";
+import ProfessionalServices from './components/ProfessionalServices';
 import './App.css'
 
 
@@ -53,36 +54,9 @@ function App() {
           MugiWash est une entreprise de lavage automobile mobile dédiée à offrir un service de qualité supérieure directement à votre porte. Nous utilisons des produits écologiques et des techniques avancées pour garantir que votre véhicule soit propre et protégé.
         </p>
       </div>
-
+      
+      <ProfessionalServices />
      
-      <div className="mw-cards" id="cards-container">
-        <article className="mw-card">
-          <div className="mw-icon mw-icon-bounce">🧽</div>
-          <h3 className="mw-title">Service à domicile</h3>
-          <p className="mw-text">
-            Nous venons chez vous au moment qui vous convient. Plus besoin de perdre du temps en
-            déplacement — on s'occupe de tout, sur place.
-          </p>
-        </article>
-
-        <article className="mw-card">
-          <div className="mw-icon mw-icon-pulse">🌿</div>
-          <h3 className="mw-title">Produits écologiques</h3>
-          <p className="mw-text">
-            Tous nos produits sont choisis pour leur efficacité et leur faible impact sur
-            l’environnement, afin de protéger votre véhicule et la planète.
-          </p>
-        </article>
-
-        <article className="mw-card">
-          <div className="mw-icon mw-icon-pulse">✨</div>
-          <h3 className="mw-title">Finition professionnelle</h3>
-          <p className="mw-text">
-            Techniques avancées et attention aux détails pour une protection longue durée et un
-            rendu impeccable.
-          </p>
-        </article>
-      </div>
       <h1 className='Diff_services'>Nos differents services</h1>
       <div class="services">
           

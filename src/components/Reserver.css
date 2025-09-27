@@ -18,7 +18,7 @@
 
 
 .back-button {
-  background: #7ec9cf;
+  background: blue;
   color: white;
   border: none;
   padding: 10px 15px;
@@ -120,7 +120,7 @@
 }
 
 .payment-option input[type="radio"]:checked + .payment-card {
-  border-color: #7ec9cf;
+  border-color: blue;
   background: #e8f4f8;
   box-shadow: 0 5px 15px rgba(126, 201, 207, 0.2);
 }
@@ -144,7 +144,7 @@
 
 .submit-button {
   width: 100%;
-  background: linear-gradient(135deg, #7ec9cf, #6bb6bd);
+  background: blue;
   color: white;
   border: none;
   padding: 15px 30px;
@@ -158,7 +158,7 @@
 
 .submit-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(126, 201, 207, 0.4);
+  box-shadow: 0 8px 20px blue;
 }
 
 /* Styles pour la page de paiement */
@@ -189,7 +189,7 @@
 
 .payment-submit-button {
   width: 100%;
-  background: linear-gradient(135deg, #28a745, #20c997);
+  background: blue;
   color: white;
   border: none;
   padding: 15px 30px;
@@ -203,7 +203,7 @@
 
 .payment-submit-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+  box-shadow: 0 8px 20px blue;
 }
 
 /* Styles pour la confirmation */
@@ -236,7 +236,7 @@
 }
 
 .confirmation-details h3 {
-  color: #2c3e50;
+  color: blue;
   margin-bottom: 20px;
   text-align: center;
 }
@@ -255,7 +255,7 @@
 
 .detail-item .label {
   font-weight: 600;
-  color: #2c3e50;
+  color: blue;
 }
 
 .detail-item .value {
@@ -298,22 +298,22 @@
 }
 
 .home-button {
-  background: #6c757d;
+  background: blue ;
   color: white;
 }
 
 .home-button:hover {
-  background: #545b62;
+  background: blue;
   transform: translateY(-2px);
 }
 
 .new-reservation-button {
-  background: #7ec9cf;
+  background: blue;
   color: white;
 }
 
 .new-reservation-button:hover {
-  background: #6bb6bd;
+  background: blue;
   transform: translateY(-2px);
 }
 
