@@ -15,7 +15,7 @@ html, body {
 
 /* Bande bleue avec slogan animé */
 .top-banner {
-  background-color: #85caf6; /* Bleu */
+  background-color: blue; /* Bleu */
   width: 100%;
   padding: 10px 0;
   display: flex;
@@ -87,11 +87,6 @@ html, body {
   margin-right: auto;
 }
 
-.menu-item:hover {
-  color: white;
-  background-color: #7ec9cf;
-}
-
 .menu-logo-container {
   display: flex;
   align-items: center;      /* centre verticalement le menu et le logo */
@@ -110,7 +105,7 @@ html, body {
 }
 
 .Reserver-button {
-  background-color: rgb(171, 207, 210); /* Bleu vif */
+  background-color: blue; /* Bleu vif */
   color: white;
   border: none;
   padding: 10px 20px;
@@ -167,13 +162,7 @@ html, body {
   letter-spacing: 2px;
   
   /* Magnifique dégradé bleu moderne */
-  background: linear-gradient(135deg,
-    #a9cad4, /* Bleu cyan brillant */
-    #0072ff, /* Bleu électrique */
-    #1e3a8a, /* Bleu royal profond */
-    #06b6d4, /* Turquoise */
-    #3b82f6  /* Bleu vif */
-  );
+  background:rgb(67, 101, 160);
   background-size: 300% 300%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -187,35 +176,6 @@ html, body {
   /* Animation fluide du dégradé */
   animation: colorWave 5s ease-in-out infinite;
   z-index: 10;
-}
-
-/* Animation des couleurs */
-@keyframes colorWave {
-  0% {
-    background-position: 0% 50%;
-    filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.9))
-            drop-shadow(0px 0px 15px rgba(0, 198, 255, 0.6));
-  }
-  25% {
-    background-position: 25% 25%;
-    filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.9))
-            drop-shadow(0px 0px 20px rgba(0, 114, 255, 0.7));
-  }
-  50% {
-    background-position: 100% 50%;
-    filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.9))
-            drop-shadow(0px 0px 25px rgba(30, 58, 138, 0.6));
-  }
-  75% {
-    background-position: 75% 75%;
-    filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.9))
-            drop-shadow(0px 0px 20px rgba(6, 182, 212, 0.7));
-  }
-  100% {
-    background-position: 0% 50%;
-    filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.9))
-            drop-shadow(0px 0px 15px rgba(59, 130, 246, 0.5));
-  }
 }
 
 /* Responsive pour mobiles */
@@ -273,13 +233,13 @@ html, body {
 .A_propos h2 {
   font-size: 3rem;
   margin-bottom: 30px;
-  color: #2c3e50;
+  color: white;
   text-align: center;
   font-weight: 700;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
   position: relative;
   z-index: 2;
-  background: linear-gradient(45deg, #a1b4c6, #79bdcf);
+  background: blue;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -300,11 +260,11 @@ html, body {
 .A_propos p {
   font-size: 1.3rem;
   line-height: 1.8;
-  color: #34495e;
+  color: black;
   max-width: 900px;
   margin: 0 auto;
   padding: 40px;
-  background: rgba(255, 255, 255, 0.95);
+  background: white;
   border: none;
   border-radius: 20px;
   box-shadow: 
@@ -377,25 +337,7 @@ html, body {
   }
 }
 
-/* Version alternative avec effet glassmorphism */
-.A_propos-glass p {
-  background: rgb(255, 255, 255);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-}
 
-.mw-cards{
-  display: grid;
-  gap: 24px;
-  grid-template-columns: 1fr;
-}
-@media (min-width: 768px){
-  .mw-cards{
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
 
 /* Each card */
 .mw-card{
@@ -467,3 +409,246 @@ html, body {
 .mw-card:nth-child(1){ transition-delay: 0ms; }
 .mw-card:nth-child(2){ transition-delay: 80ms; }
 .mw-card:nth-child(3){ transition-delay: 160ms; }
+
+.Diff_services {
+  text-align: center;
+  font-size: 3rem;
+  margin: 60px 0 30px;
+  font-weight: 700;
+  color: black;
+  position: relative;
+}
+
+.services {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.service {
+  background: rgb(207, 207, 207);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.service::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+}
+
+.service.bronze::before {
+  background: linear-gradient(90deg, #cd7f32 0%, #daa520 100%);
+}
+
+.service.argent::before {
+  background: linear-gradient(90deg, #c0c0c0 0%, #e5e5e5 100%);
+}
+
+.service.or::before {
+  background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%);
+}
+
+.service:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+}
+
+.service h3 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.service.bronze h3 {
+  color: #cd7f32;
+}
+
+.service.argent h3 {
+  color: #757575;
+}
+
+.service.or h3 {
+  color: #daa520;
+}
+
+.price {
+  text-align: center;
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 25px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.features {
+  list-style: none;
+  margin-bottom: 20px;
+}
+
+.features li {
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  position: relative;
+  padding-left: 30px;
+}
+
+.features li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #4caf50;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.features li:last-child {
+  border-bottom: none;
+}
+
+.option {
+  background: rgba(103, 126, 234, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 20px;
+  border-left: 4px solid #667eea;
+}
+
+.option h4 {
+  color: #667eea;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+}
+
+.option p {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.contact {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.contact h2 {
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 2rem;
+}
+
+.contact-info {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.contact-item .icon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+.disclaimer {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 30px;
+  text-align: center;
+  font-style: italic;
+  color: #856404;
+}
+
+@media (max-width: 768px) {
+  h1 {
+      font-size: 2rem;
+  }
+  
+  .services {
+      grid-template-columns: 1fr;
+  }
+  
+  .contact-info {
+      flex-direction: column;
+      gap: 20px;
+  }
+}
+
+.contact-section {
+  padding: 40px 20px;
+  background-color: #f9f9f9;
+  text-align: center;
+}
+
+.contact-form {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.contact-form button {
+  background-color: #85caf6;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.contact-form button:hover {
+  background-color: #67b0e8;
+}
+
+
+
+.App-footer {
+  background-color: #2c3e50;
+  color: white;
+  text-align: center;
+  padding: 15px 20px;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  font-size: 14px;
+}

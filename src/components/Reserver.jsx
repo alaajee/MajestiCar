@@ -48,11 +48,11 @@ function Reserver() {
         // Redirection selon le mode de paiement
         if (formData.paiement === 'CB') {
             if (formData.plan === 'bronze') {
-                window.location.href = "https://buy.stripe.com/test_cNi8wRdio84Z9Dp3lM1oI00"; 
+                window.location.href = "https://buy.stripe.com/3cI5kD41t7Aq81C4yy8bS00"; 
             } else if (formData.plan === 'argent') {
-                window.location.href = "https://buy.stripe.com/test_14k8wRdio84Z9Dp3lM1oI00"; 
+                window.location.href = "https://buy.stripe.com/cNi7sL9lN5si81Ce988bS01"; 
             } else if (formData.plan === 'or') {
-                window.location.href = "https://buy.stripe.com/test_5kA5nO2io84Z9Dp3lM1oI00"; 
+                window.location.href = "https://buy.stripe.com/3cI3cv41t07Y3Lme988bS02"; 
             }
         } else {
             // Pour le paiement en espèces, on peut rediriger vers une page de confirmation

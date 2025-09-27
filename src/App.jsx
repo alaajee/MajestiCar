@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import image1 from './assets/Photodecouv.jpeg'
+import image1 from './assets/im.jpg'
 import image2 from './assets/logo1.jpeg'
 import { Link } from 'react-router-dom';
+import ContactForm from "./components/ContactForm";
 import './App.css'
 
 
@@ -82,7 +83,80 @@ function App() {
           </p>
         </article>
       </div>
+      <h1 className='Diff_services'>Nos differents services</h1>
+      <div class="services">
+          
+            <div class="service bronze">
+                <h3>Formule Bronze</h3>
+                <div class="price">50€</div>
+                <ul class="features">
+                    <li>Aspiration complète de l'habitacle</li>
+                    <li>Décontamination vapeur tapis/moquettes/coffre</li>
+                    <li>Nettoyage des vitres et pare-brise</li>
+                    <li>Traitement des plastiques/tableau de bord</li>
+                    <li>Parfum</li>
+                </ul>
+                <div class="option">
+                    <h4>Shampouineuse en option :</h4>
+                    <p>10€ par siège / 40€ pour les 5 sièges
+                    <em>(avec les tapis et moquettes)</em></p>
+                </div>
+            </div>
+
+            <div class="service argent">
+                <h3>Formule Argent</h3>
+                <div class="price">80€</div>
+                <ul class="features">
+                    <li>Aspiration complète de l'habitacle</li>
+                    <li>Décontamination vapeur sièges/tapis/moquettes/coffre</li>
+                    <li>Nettoyage des vitres et pare-brise</li>
+                    <li>Traitement des plastiques/tableau de bord</li>
+                    <li>Nettoyage des seuils de portes</li>
+                    <li>Dégraissage de la trappe à carburant</li>
+                    <li>Parfum</li>
+                </ul>
+                <div class="option">
+                    <h4>Shampouineuse en option :</h4>
+                    <p>5€ par siège / 20€ pour les 5 sièges
+                    <em>(avec les tapis et moquettes)</em></p>
+                </div>
+            </div>
+
+            <div class="service or">
+                <h3>Formule Or</h3>
+                <div class="price">120€</div>
+                <ul class="features">
+                    <li>Aspiration complète de l'habitacle</li>
+                    <li>Décontamination vapeur sièges/tapis/moquettes/coffre</li>
+                    <li>Shampouineuse sièges/tapis/moquettes/coffre <strong>(INCLUSE)</strong></li>
+                    <li>Nettoyage des vitres et pare-brise</li>
+                    <li>Traitement des plastiques/tableau de bord</li>
+                    <li>Nettoyage des seuils de portes</li>
+                    <li>Dégraissage de la trappe à carburant</li>
+                    <li>Parfum</li>
+                    <li>Décontamination de l'habitacle et traitement du système d'aération</li>
+                </ul>
+            </div>
+        </div>
+
+        <div className="contact-section">
+          <h2>Contactez-nous</h2>
+          <form className="contact-form">
+            <input type="text" placeholder="Votre nom" required />
+            <input type="email" placeholder="Votre email" required />
+            <textarea placeholder="Votre message" required></textarea>
+            <button type="submit">Envoyer</button>
+          </form>
+        </div>
         
+      <footer className="App-footer">
+        <p>&copy; 2024 MugiWash. Tous droits réservés.</p>
+        <div className="social-links">
+          <a href="#" className="social-link">Facebook</a>
+          <a href="#" className="social-link">Twitter</a>
+          <a href="#" className="social-link">Instagram</a>
+        </div>
+      </footer>
     </div>
   )
 }
