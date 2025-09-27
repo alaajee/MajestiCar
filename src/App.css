@@ -23,6 +23,11 @@ html, body {
   align-items: center;
   position: relative;
   overflow: hidden;
+  position: fixed;   /* reste toujours visible */
+  top: 0;
+  left: 0;
+  z-index: 1000;     /* au-dessus du reste */
+  overflow: hidden;
 }
 
 .slogan {
@@ -73,6 +78,11 @@ html, body {
   text-align: center;
   margin: 0;
   box-sizing: border-box; /* Inclut le padding dans la largeur */
+  position: fixed;   /* reste visible */
+  top: 40px;         /* juste sous la bannière */
+  left: 0;
+  z-index: 999;
+  border-bottom: 1px solid #ddd;
 }
 
 .menu-item {
@@ -151,7 +161,7 @@ html, body {
 /* Slogan sur l'image */
 .image-slogan {
   position: absolute;
-  top: 35%; /* Centre verticalement */
+  top: 50%; /* Centre verticalement */
   left: 50%; /* Centre horizontalement */
   transform: translate(-50%, -50%); /* Centrage parfait horizontal ET vertical */
   max-width: 90%;
