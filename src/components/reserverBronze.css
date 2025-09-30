@@ -1,0 +1,213 @@
+.reservation-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+  }
+  
+  .reservation-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .reservation-header h1 {
+    color: #2c5aa0;
+    margin-bottom: 1rem;
+  }
+  
+  .price-badge {
+    display: inline-block;
+    background: #2c5aa0;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  
+  .reservation-details {
+    background: #f9f9f9;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+  }
+  
+  .reservation-details h3 {
+    color: #2c5aa0;
+    margin-bottom: 1rem;
+  }
+  
+  .reservation-details ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .reservation-details li {
+    padding: 0.5rem 0;
+    color: #555;
+  }
+  
+  .calendar-section {
+    margin: 3rem 0;
+  }
+  
+  .calendar-section h2 {
+    color: #2c5aa0;
+    margin-bottom: 1.5rem;
+  }
+  
+  .rbc-calendar {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+  }
+  
+  .form-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 3rem;
+  }
+  
+  .form-section h2 {
+    color: #2c5aa0;
+    margin-bottom: 1.5rem;
+  }
+  
+  .selected-date {
+    background: #e3f2fd;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 1.1rem;
+    color: #2c5aa0;
+  }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #2c5aa0;
+  }
+  
+  .options-section {
+    background: #f9f9f9;
+    padding: 2rem;
+    border-radius: 12px;
+    margin: 2rem 0;
+  }
+  
+  .options-section h3 {
+    color: #2c5aa0;
+    margin-bottom: 1.5rem;
+  }
+  
+  .option-item {
+    margin-bottom: 1.5rem;
+  }
+  
+  .option-item label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .option-item select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+  
+  .option-item.checkbox {
+    display: flex;
+    align-items: center;
+  }
+  
+  .option-item.checkbox input {
+    width: auto;
+    margin-right: 0.75rem;
+    transform: scale(1.3);
+    cursor: pointer;
+  }
+  
+  .option-item.checkbox label {
+    margin-bottom: 0;
+    cursor: pointer;
+  }
+  
+  .total-section {
+    background: #2c5aa0;
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    margin: 2rem 0;
+  }
+  
+  .total-section h3 {
+    margin: 0;
+    font-size: 1.8rem;
+  }
+  
+  .submit-button {
+    width: 100%;
+    padding: 1.5rem;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .submit-button:hover {
+    background: #218838;
+  }
+  
+  .submit-button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  @media (max-width: 768px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+    
+    .reservation-container {
+      padding: 1rem;
+    }
+  }

@@ -2,14 +2,17 @@ import { useState, useEffect } from 'react'
 import image1 from './assets/im.jpg'
 import image2 from './assets/logo1.jpeg'
 import { Link } from 'react-router-dom';
-import ContactForm from "./components/ContactForm";
 import ProfessionalServices from './components/ProfessionalServices';
+import {useRef} from 'react';
 import './App.css'
 
 
 function App() {
   const [count, setCount] = useState(0)
-  
+  const servicesRef = useRef(null);
+  const scrollToServices = () => {
+    servicesRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
   useEffect(() => {
     const cards = document.querySelectorAll(".mw-card");
     cards.forEach((card, i) => {
@@ -45,20 +48,39 @@ function App() {
         <div className="image-slogan">
           Votre voiture, notre soin, partout avec MugiWash.
         </div>
-      </div>
 
+        <div className="Mes_services">
+          <button onClick={scrollToServices} className='Button_services'>
+            Voir nos services
+          </button>
+        </div> 
+
+      </div>
+      
       
       <div className="A_propos">
-        <h2>À propos de MugiWash</h2>
-        <p>
-          MugiWash est une entreprise de lavage automobile mobile dédiée à offrir un service de qualité supérieure directement à votre porte. Nous utilisons des produits écologiques et des techniques avancées pour garantir que votre véhicule soit propre et protégé.
-        </p>
-      </div>
+      <h2>À propos de MugiWash</h2>
+      <p>
+        Avec Mugiwash, plus besoin de vous déplacer pour redonner éclat et propreté à votre véhicule.
+        Notre station de lavage automobile mobile, entièrement autonome en électricité, se déplace directement chez vous ou sur votre lieu de travail.
+        Équipés de tout le matériel nécessaire installé dans notre Kangoo utilitaire, nous vous proposons un service complet de nettoyage, du toit jusqu'aux roues, sans que vous ayez à bouger votre voiture.
+        <ul>
+          <li>✅ <strong>Service à domicile ou sur site</strong> – gain de temps garanti</li>
+          <li>✅ <strong>Autonomie totale</strong> – pas besoin de branchement, nous apportons tout</li>
+          <li>✅ <strong>Nettoyage complet</strong> – intérieur, extérieur, toit, jantes, détails</li>
+          <li>✅ <strong>Respect du véhicule et de l'environnement</strong> – produits adaptés et efficaces</li>
+        </ul>
+        Que ce soit pour un entretien régulier ou un nettoyage en profondeur, Mugiwash vous apporte la qualité d’une station de lavage professionnelle, avec la praticité d’un service mobile.
+        👉 Réservez dès maintenant votre lavage mobile Mugiwash et profitez d’un véhicule propre sans contrainte 
+      </p>
       
+     
+     </div>
+          
       <ProfessionalServices />
      
-      <h1 className='Diff_services'>Nos differents services</h1>
-      <div class="services">
+      <h1 className='Diff_services' ref={servicesRef}>Nos differents services</h1>
+      <div className="services" id='Diff_services'>
           
             <div class="service bronze">
                 <h3>Formule Bronze</h3>
@@ -75,6 +97,9 @@ function App() {
                     <p>10€ par siège / 40€ pour les 5 sièges
                     <em>(avec les tapis et moquettes)</em></p>
                 </div>
+                <Link to="/reserver-bronze" className="select-button">
+                  Choisir cette formule
+                </Link>
             </div>
 
             <div class="service argent">
@@ -94,6 +119,10 @@ function App() {
                     <p>5€ par siège / 20€ pour les 5 sièges
                     <em>(avec les tapis et moquettes)</em></p>
                 </div>
+
+                <Link to="/reserver-argent" className="select-button">
+                  Choisir cette formule
+                </Link>
             </div>
 
             <div class="service or">
@@ -110,6 +139,9 @@ function App() {
                     <li>Parfum</li>
                     <li>Décontamination de l'habitacle et traitement du système d'aération</li>
                 </ul>
+                <Link to="/reserver-or" className="select-button">
+                  Choisir cette formule
+                </Link>
             </div>
         </div>
 
