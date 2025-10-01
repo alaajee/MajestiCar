@@ -8,6 +8,7 @@ import ReserverBronze from './components/reserverBronze.jsx'
 import ReserverArgent from './components/reserverArgent.jsx'
 import ReserverOr from './components/reserverOr.jsx'
 import { ReservationsProvider } from './components/ReservationsContext.jsx'
+import ReservationSuccess from './components/ReservationSuccess';
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -20,6 +21,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/reserver-bronze" element={<ReserverBronze />} />
           <Route path="/reserver-argent" element={<ReserverArgent />} />
           <Route path="/reserver-or" element={<ReserverOr />} />
+          <Route path="/reservation-success" element={<ReservationSuccess />} />
         </Routes>
       </HashRouter>
     </ReservationsProvider>

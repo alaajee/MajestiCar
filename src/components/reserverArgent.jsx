@@ -5,17 +5,29 @@ import { Link } from "react-router-dom";
 import moment from "moment";
 import "moment/locale/fr";
 import emailjs from "emailjs-com";
-
+import { useReservations } from './ReservationsContext';
+import { loadStripe } from '@stripe/stripe-js';
 
 moment.locale('fr');
 const localizer = momentLocalizer(moment);
 
+// ⚠️ Remplacez par votre clé publique Stripe
+const stripePromise = loadStripe('pk_test_VOTRE_CLE_PUBLIQUE_STRIPE');
+
 function reserverArgent() {
+  const { 
+    reservations, 
+    ajouterReservation, 
+    getHorairesDisponibles,
+    getReservationsParDate 
+  } = useReservations();
+
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState(""); // "stripe" ou "surplace"
   
   const [formData, setFormData] = useState({
     nom: "",
@@ -24,22 +36,27 @@ function reserverArgent() {
     telephone: ""
   });
 
-  // NOUVELLES OPTIONS
   const [selectedOptions, setSelectedOptions] = useState([]);
 
   const optionsDisponibles = [
-    { id: "interieur", nom: "Nettoyage intérieur complet", prix: 15 },
-    { id: "jantes", nom: "Nettoyage jantes premium", prix: 10 },
-    { id: "polish", nom: "Polish carrosserie", prix: 25 },
-    { id: "cire", nom: "Application cire protectrice", prix: 20 },
-    { id: "vitres", nom: "Traitement vitres hydrophobe", prix: 12 },
-    { id: "moteur", nom: "Nettoyage moteur", prix: 18 }
+    { id: "interieur", nom: "Shampouineuses siège, tapis et moquettes", prix: 25 },
+    { id: "jantes", nom: "Lavage extérieur avec shampoing", prix: 20 },
+    { id: "polish", nom: "Lavage moteur", prix: 15 },
+    { id: "cire", nom: "Elimination poils d’animaux", prix: 15 },
+    { id: "vitres", nom: "Véhicules très sale (ex: vomis..)", prix: 15 },
   ];
 
-  const horairesDispo = [
-    "09:00", "10:00", "11:00", "12:00",
-    "14:00", "15:00", "16:00", "17:00"
-  ];
+  const getHorairesDisponiblesForDate = (date) => {
+    if (!date) return [];
+    return getHorairesDisponibles(date);
+  };
+
+  const events = reservations.map(resa => ({
+    title: `${resa.heure} - ${resa.formule}`,
+    start: new Date(resa.date),
+    end: new Date(resa.date),
+    allDay: true
+  }));
 
   const handleSelectSlot = (slotInfo) => {
     const today = new Date();
@@ -47,7 +64,9 @@ function reserverArgent() {
     
     if (slotInfo.start >= today) {
       setSelectedDate(slotInfo.start);
-      console.log("Date sélectionnée:", slotInfo.start);
+      setSelectedTime("");
+      setShowForm(false);
+      setPaymentMethod("");
     } else {
       alert("Vous ne pouvez pas réserver dans le passé");
     }
@@ -67,7 +86,6 @@ function reserverArgent() {
     setShowForm(true);
   };
 
-  // GESTION DES OPTIONS
   const toggleOption = (optionId) => {
     setSelectedOptions(prev => {
       if (prev.includes(optionId)) {
@@ -78,7 +96,6 @@ function reserverArgent() {
     });
   };
 
-  // CALCUL DU PRIX TOTAL
   const calculerPrixTotal = () => {
     const prixBase = 50;
     const prixOptions = selectedOptions.reduce((total, optionId) => {
@@ -88,87 +105,143 @@ function reserverArgent() {
     return prixBase + prixOptions;
   };
 
+  // 💳 Fonction de paiement Stripe
+  const handleStripePayment = async () => {
+    try {
+      const stripe = await stripePromise;
+      
+      // Appel à votre backend pour créer une session Stripe Checkout
+      const response = await fetch('https://votre-backend.com/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: calculerPrixTotal() * 100, // Stripe utilise les centimes
+          nom: formData.nom,
+          prenom: formData.prenom,
+          email: formData.email,
+          date: moment(selectedDate).format('DD/MM/YYYY'),
+          time: selectedTime,
+          formule: 'Argent',
+          options: selectedOptions
+        }),
+      });
+
+      const session = await response.json();
+
+      // Redirection vers Stripe Checkout
+      const result = await stripe.redirectToCheckout({
+        sessionId: session.id,
+      });
+
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+    } catch (error) {
+      console.error('Erreur Stripe:', error);
+      alert('Erreur lors du paiement : ' + error.message);
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validation
+    // Validations
     if (!selectedDate || !selectedTime) {
       alert("Veuillez sélectionner une date et une heure");
       return;
     }
 
-    const { nom, prenom, email, telephone } = formData;
-    if (!nom || !prenom || !email || !telephone) {
-      alert("Veuillez remplir tous les champs");
+    if (!paymentMethod) {
+      alert("Veuillez choisir un mode de paiement");
       return;
     }
 
-    // Validation email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      alert("Email invalide");
+    if (!emailRegex.test(formData.email)) {
+      alert("Veuillez entrer un email valide");
       return;
     }
 
-    // Validation téléphone
-    const telRegex = /^[0-9]{10}$/;
-    if (!telRegex.test(telephone.replace(/\s/g, ''))) {
-      alert("Numéro de téléphone invalide (10 chiffres requis)");
+    const phoneRegex = /^[0-9\s+()-]{10,}$/;
+    if (!phoneRegex.test(formData.telephone)) {
+      alert("Veuillez entrer un numéro de téléphone valide");
       return;
     }
-
+  
     setLoading(true);
-
-    // Préparer la liste des options sélectionnées
-    const optionsTexte = selectedOptions.length > 0
-      ? selectedOptions.map(optionId => {
-          const option = optionsDisponibles.find(opt => opt.id === optionId);
-          return `${option.nom} (+${option.prix}€)`;
-        }).join(', ')
-      : 'Aucune option';
-
-    // Préparer les données pour l'email
-    const templateParams = {
-      from_name: `${prenom} ${nom}`,
-      from_email: email,
-      phone: telephone,
-      date: moment(selectedDate).format('DD/MM/YYYY'),
-      time: selectedTime,
-      service: 'Formule Bronze - 50€',
-      options: optionsTexte,
-      prix_total: `${calculerPrixTotal()}€`
-    };
-
+  
     try {
-      // Envoi de l'email via EmailJS
-      await emailjs.send(
-        'service_1wryoqr',
-        'template_x1vgr07',
-        templateParams,
-        'KUPBmz5lg0pubUDdW'
-      );
-      
-      alert('Réservation confirmée ! Un email de confirmation vous a été envoyé.');
-      
-      // Reset du formulaire
-      setFormData({ nom: "", prenom: "", email: "", telephone: "" });
-      setSelectedDate(null);
-      setSelectedTime("");
-      setShowForm(false);
-      setSelectedOptions([]);
+      const optionsTexte = selectedOptions.length > 0
+        ? selectedOptions.map(optionId => {
+            const option = optionsDisponibles.find(opt => opt.id === optionId);
+            return `${option.nom} (+${option.prix}€)`;
+          }).join(', ')
+        : 'Aucune option supplémentaire';
+
+      // SI PAIEMENT PAR CARTE
+      if (paymentMethod === "stripe") {
+        // 1️⃣ Bloquer le créneau dans Firebase
+        await ajouterReservation(selectedDate, selectedTime, 'Argent');
+        
+        // 2️⃣ Rediriger vers Stripe (l'email sera envoyé après paiement réussi)
+        await handleStripePayment();
+        return; // Arrêter ici, Stripe gère la suite
+      }
+
+      // SI PAIEMENT SUR PLACE
+      if (paymentMethod === "surplace") {
+        // 1️⃣ Bloquer le créneau dans Firebase
+        await ajouterReservation(selectedDate, selectedTime, 'Argent');
+        
+        // 2️⃣ Envoyer l'email de confirmation
+        const templateParams = {
+          from_name: `${formData.prenom} ${formData.nom}`,
+          from_email: formData.email,
+          phone: formData.telephone,
+          date: moment(selectedDate).format('DD/MM/YYYY'),
+          time: selectedTime,
+          service: 'Formule Argent - 50€',
+          options: optionsTexte,
+          prix_total: `${calculerPrixTotal()}€`,
+          payment_method: 'Paiement sur place'
+        };
+    
+        await emailjs.send(
+          'service_1wryoqr',
+          'template_x1vgr07',
+          templateParams,
+          'KUPBmz5lg0pubUDdW'
+        );
+        
+        alert('✅ Réservation confirmée ! Paiement à effectuer sur place.\nUn email de confirmation vous a été envoyé.');
+        
+        // Reset
+        setFormData({ nom: "", prenom: "", email: "", telephone: "" });
+        setSelectedDate(null);
+        setSelectedTime("");
+        setShowForm(false);
+        setSelectedOptions([]);
+        setPaymentMethod("");
+      }
       
     } catch (error) {
-      console.error('Erreur lors de l\'envoi:', error);
-      alert('Erreur lors de l\'envoi. Veuillez réessayer.');
+      console.error('Erreur complète:', error);
+      alert(`Erreur lors de la réservation: ${error.message || 'Veuillez réessayer.'}`);
     } finally {
       setLoading(false);
     }
   };
 
+  const horairesDisponibles = selectedDate ? getHorairesDisponiblesForDate(selectedDate) : [];
+  const reservationsJour = selectedDate ? getReservationsParDate(selectedDate) : [];
+
   return (
     <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
       <h1 style={{ textAlign: "center", color: "#2c5aa0", marginBottom: "2rem" }}>
-        Réservation Formule Bronze - 50€
+        Réservation Formule Argent - 50€
       </h1>
 
       {/* CALENDRIER */}
@@ -178,7 +251,7 @@ function reserverArgent() {
         <div style={{ height: "600px", marginTop: "1rem" }}>
           <Calendar
             localizer={localizer}
-            events={[]}
+            events={events}
             startAccessor="start"
             endAccessor="end"
             style={{ height: "100%" }}
@@ -194,6 +267,16 @@ function reserverArgent() {
               today: "Aujourd'hui",
               month: "Mois"
             }}
+            eventPropGetter={(event) => ({
+              style: {
+                backgroundColor: '#2c5aa0',
+                borderRadius: '5px',
+                opacity: 0.8,
+                color: 'white',
+                border: '0px',
+                display: 'block'
+              }
+            })}
           />
         </div>
       </div>
@@ -210,33 +293,73 @@ function reserverArgent() {
           <p style={{ marginBottom: "1rem", color: "#555", fontSize: "1.1rem" }}>
             📅 Date sélectionnée : <strong>{moment(selectedDate).format("dddd DD MMMM YYYY")}</strong>
           </p>
-          
-          <div style={{ 
-            display: "grid", 
-            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", 
-            gap: "1rem",
-            marginTop: "1.5rem"
-          }}>
-            {horairesDispo.map((heure) => (
-              <button
-                key={heure}
-                onClick={() => handleTimeSelect(heure)}
-                style={{
-                  padding: "1rem",
-                  border: selectedTime === heure ? "2px solid #2c5aa0" : "1px solid #ddd",
-                  background: selectedTime === heure ? "#2c5aa0" : "white",
-                  color: selectedTime === heure ? "white" : "#333",
-                  borderRadius: "8px",
-                  fontSize: "1.1rem",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  transition: "all 0.3s"
-                }}
-              >
-                {heure}
-              </button>
-            ))}
-          </div>
+
+          {reservationsJour.length > 0 && (
+            <div style={{ 
+              marginBottom: "1rem", 
+              padding: "1rem", 
+              background: "#fff3cd", 
+              borderRadius: "8px",
+              border: "1px solid #ffc107"
+            }}>
+              <strong>⚠️ Créneaux déjà réservés ce jour :</strong>
+              <div style={{ marginTop: "0.5rem" }}>
+                {reservationsJour.map(resa => (
+                  <span key={resa.id} style={{ 
+                    display: "inline-block",
+                    margin: "0.25rem",
+                    padding: "0.5rem",
+                    background: "#dc3545",
+                    color: "white",
+                    borderRadius: "5px",
+                    fontSize: "0.9rem"
+                  }}>
+                    {resa.heure} ({resa.formule})
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {horairesDisponibles.length === 0 ? (
+            <div style={{ 
+              padding: "2rem", 
+              textAlign: "center", 
+              background: "#f8d7da",
+              color: "#721c24",
+              borderRadius: "8px",
+              fontSize: "1.1rem"
+            }}>
+              ❌ Tous les créneaux sont réservés pour cette date. Veuillez choisir un autre jour.
+            </div>
+          ) : (
+            <div style={{ 
+              display: "grid", 
+              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", 
+              gap: "1rem",
+              marginTop: "1.5rem"
+            }}>
+              {horairesDisponibles.map((heure) => (
+                <button
+                  key={heure}
+                  onClick={() => handleTimeSelect(heure)}
+                  style={{
+                    padding: "1rem",
+                    border: selectedTime === heure ? "2px solid #2c5aa0" : "1px solid #ddd",
+                    background: selectedTime === heure ? "#2c5aa0" : "white",
+                    color: selectedTime === heure ? "white" : "#333",
+                    borderRadius: "8px",
+                    fontSize: "1.1rem",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    transition: "all 0.3s"
+                  }}
+                >
+                  {heure} ✓
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -436,23 +559,98 @@ function reserverArgent() {
               />
             </div>
 
+            {/* MODE DE PAIEMENT */}
+            <div style={{ marginBottom: "2rem" }}>
+              <h3 style={{ color: "#2c5aa0", marginBottom: "1rem" }}>
+                💳 Mode de paiement *
+              </h3>
+              
+              <div style={{ 
+                display: "grid", 
+                gridTemplateColumns: "1fr 1fr", 
+                gap: "1rem" 
+              }}>
+                {/* OPTION CARTE BANCAIRE */}
+                <div
+                  onClick={() => setPaymentMethod("stripe")}
+                  style={{
+                    padding: "1.5rem",
+                    border: paymentMethod === "stripe" 
+                      ? "3px solid #635bff" 
+                      : "2px solid #ddd",
+                    background: paymentMethod === "stripe" 
+                      ? "#f6f9fc" 
+                      : "white",
+                    borderRadius: "12px",
+                    cursor: "pointer",
+                    transition: "all 0.3s",
+                    textAlign: "center"
+                  }}
+                >
+                  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>💳</div>
+                  <strong style={{ display: "block", marginBottom: "0.5rem" }}>
+                    Carte bancaire
+                  </strong>
+                  <span style={{ fontSize: "0.9rem", color: "#666" }}>
+                    Paiement sécurisé par Stripe
+                  </span>
+                </div>
+
+                {/* OPTION SUR PLACE */}
+                <div
+                  onClick={() => setPaymentMethod("surplace")}
+                  style={{
+                    padding: "1.5rem",
+                    border: paymentMethod === "surplace" 
+                      ? "3px solid #28a745" 
+                      : "2px solid #ddd",
+                    background: paymentMethod === "surplace" 
+                      ? "#f0fdf4" 
+                      : "white",
+                    borderRadius: "12px",
+                    cursor: "pointer",
+                    transition: "all 0.3s",
+                    textAlign: "center"
+                  }}
+                >
+                  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🏪</div>
+                  <strong style={{ display: "block", marginBottom: "0.5rem" }}>
+                    Sur place
+                  </strong>
+                  <span style={{ fontSize: "0.9rem", color: "#666" }}>
+                    Paiement lors du rendez-vous
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !paymentMethod}
               style={{
                 width: "100%",
                 padding: "1.5rem",
-                background: loading ? "#6c757d" : "#28a745",
+                background: loading || !paymentMethod 
+                  ? "#6c757d" 
+                  : paymentMethod === "stripe" 
+                    ? "#635bff" 
+                    : "#28a745",
                 color: "white",
                 border: "none",
                 borderRadius: "12px",
                 fontSize: "1.2rem",
                 fontWeight: "bold",
-                cursor: loading ? "not-allowed" : "pointer",
+                cursor: loading || !paymentMethod ? "not-allowed" : "pointer",
                 transition: "background 0.3s"
               }}
             >
-              {loading ? "Envoi en cours..." : `Confirmer la réservation - ${calculerPrixTotal()}€`}
+              {loading 
+                ? "Traitement en cours..." 
+                : paymentMethod === "stripe"
+                  ? `💳 Payer ${calculerPrixTotal()}€ par carte`
+                  : paymentMethod === "surplace"
+                    ? `Confirmer la réservation - ${calculerPrixTotal()}€`
+                    : "Choisissez un mode de paiement"}
             </button>
           </form>
         </div>

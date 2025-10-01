@@ -59,23 +59,27 @@ function App() {
       
       
       <div className="A_propos">
-      <h2>À propos de MugiWash</h2>
+      <h2>À propos de Majesti’Car</h2>
       <p>
-        Avec Mugiwash, plus besoin de vous déplacer pour redonner éclat et propreté à votre véhicule.
-        Notre station de lavage automobile mobile, entièrement autonome en électricité, se déplace directement chez vous ou sur votre lieu de travail.
-        Équipés de tout le matériel nécessaire installé dans notre Kangoo utilitaire, nous vous proposons un service complet de nettoyage, du toit jusqu'aux roues, sans que vous ayez à bouger votre voiture.
-        <ul>
-          <li>✅ <strong>Service à domicile ou sur site</strong> – gain de temps garanti</li>
-          <li>✅ <strong>Autonomie totale</strong> – pas besoin de branchement, nous apportons tout</li>
-          <li>✅ <strong>Nettoyage complet</strong> – intérieur, extérieur, toit, jantes, détails</li>
-          <li>✅ <strong>Respect du véhicule et de l'environnement</strong> – produits adaptés et efficaces</li>
-        </ul>
-        Que ce soit pour un entretien régulier ou un nettoyage en profondeur, Mugiwash vous apporte la qualité d’une station de lavage professionnelle, avec la praticité d’un service mobile.
-        👉 Réservez dès maintenant votre lavage mobile Mugiwash et profitez d’un véhicule propre sans contrainte 
+        Bienvenue chez Majesti’Car, votre partenaire du nettoyage automobile premium 💎.
+        Nous avons conçu un utilitaire transformé en station de lavage mobile 🔋💧, 100% autonome en électricité et en eau, pour vous offrir un service rapide, pratique et haut de gamme. <br/>
+
+        📍 Où vous voulez, quand vous voulez :<br />
+        - À domicile 🏡<br />
+        - Sur votre lieu de travail 🏢<br />
+        - Ou à l’adresse de votre choix 📌<br /><br />
+
+        ✅ Nos services :<br />
+        - Nettoyage extérieur 🚿🚗<br />
+        - Nettoyage intérieur 🧽🪣<br />
+        - Finitions soignées pour un rendu comme neuf ✨<br /><br />
+
+        Avec Majesti’Car, plus besoin de vous déplacer : 👉 Nous venons à vous et nous redonnons tout son éclat à votre véhicule.<br /><br />
+
+        Confort, qualité et exigence sont au cœur de notre savoir-faire 💯.
       </p>
-      
-     
-     </div>
+    </div>
+
           
       <ProfessionalServices />
      
@@ -84,10 +88,9 @@ function App() {
           
             <div class="service bronze">
                 <h3>Formule Bronze</h3>
-                <div class="price">50€</div>
+                <div class="price">40€</div>
                 <ul class="features">
                     <li>Aspiration complète de l'habitacle</li>
-                    <li>Décontamination vapeur tapis/moquettes/coffre</li>
                     <li>Nettoyage des vitres et pare-brise</li>
                     <li>Traitement des plastiques/tableau de bord</li>
                     <li>Parfum</li>

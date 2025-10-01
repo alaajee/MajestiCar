@@ -5,11 +5,20 @@ import { Link } from "react-router-dom";
 import moment from "moment";
 import "moment/locale/fr";
 import emailjs from "emailjs-com";
+import { useReservations } from './ReservationsContext';
 
 moment.locale('fr');
 const localizer = momentLocalizer(moment);
 
 function reserverOr() {
+  // UTILISATION DU CONTEXTE
+  const { 
+    reservations, 
+    ajouterReservation, 
+    getHorairesDisponibles,
+    getReservationsParDate 
+  } = useReservations();
+
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -23,10 +32,29 @@ function reserverOr() {
     telephone: ""
   });
 
-  const horairesDispo = [
-    "09:00", "10:00", "11:00", "12:00",
-    "14:00", "15:00", "16:00", "17:00"
+  const [selectedOptions, setSelectedOptions] = useState([]);
+
+  const optionsDisponibles = [
+    { id: "interieur", nom: "Shampouineuses siège, tapis et moquettes", prix: 25 },
+    { id: "jantes", nom: "Lavage extérieur avec shampoing", prix: 20 },
+    { id: "polish", nom: "Lavage moteur", prix: 15 },
+    { id: "cire", nom: "Elimination poils d’animaux", prix: 15 },
+    { id: "vitres", nom: "Véhicules très sale (ex: vomis..)", prix: 15 },
   ];
+
+  // Horaires disponibles dynamiques basés sur les réservations
+  const getHorairesDisponiblesForDate = (date) => {
+    if (!date) return [];
+    return getHorairesDisponibles(date);
+  };
+
+  // Convertir les réservations en événements pour le calendrier
+  const events = reservations.map(resa => ({
+    title: `${resa.heure} - ${resa.formule}`,
+    start: new Date(resa.date),
+    end: new Date(resa.date),
+    allDay: true
+  }));
 
   const handleSelectSlot = (slotInfo) => {
     const today = new Date();
@@ -34,6 +62,8 @@ function reserverOr() {
     
     if (slotInfo.start >= today) {
       setSelectedDate(slotInfo.start);
+      setSelectedTime(""); // Reset l'heure sélectionnée
+      setShowForm(false); // Reset le formulaire
       console.log("Date sélectionnée:", slotInfo.start);
     } else {
       alert("Vous ne pouvez pas réserver dans le passé");
@@ -54,6 +84,25 @@ function reserverOr() {
     setShowForm(true);
   };
 
+  const toggleOption = (optionId) => {
+    setSelectedOptions(prev => {
+      if (prev.includes(optionId)) {
+        return prev.filter(id => id !== optionId);
+      } else {
+        return [...prev, optionId];
+      }
+    });
+  };
+
+  const calculerPrixTotal = () => {
+    const prixBase = 50;
+    const prixOptions = selectedOptions.reduce((total, optionId) => {
+      const option = optionsDisponibles.find(opt => opt.id === optionId);
+      return total + (option ? option.prix : 0);
+    }, 0);
+    return prixBase + prixOptions;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -63,62 +112,71 @@ function reserverOr() {
       return;
     }
 
-    const { nom, prenom, email, telephone } = formData;
-    if (!nom || !prenom || !email || !telephone) {
-      alert("Veuillez remplir tous les champs");
-      return;
-    }
-
     // Validation email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      alert("Email invalide");
+    if (!emailRegex.test(formData.email)) {
+      alert("Veuillez entrer un email valide");
       return;
     }
 
     // Validation téléphone
-    const telRegex = /^[0-9]{10}$/;
-    if (!telRegex.test(telephone.replace(/\s/g, ''))) {
-      alert("Numéro de téléphone invalide (10 chiffres requis)");
+    const phoneRegex = /^[0-9\s+()-]{10,}$/;
+    if (!phoneRegex.test(formData.telephone)) {
+      alert("Veuillez entrer un numéro de téléphone valide");
       return;
     }
-
+  
     setLoading(true);
-
-    // Préparer les données pour l'email
-    const templateParams = {
-      from_name: `${prenom} ${nom}`,
-      from_email: email,
-      phone: telephone,
-      date: moment(selectedDate).format('DD/MM/YYYY'),
-      time: selectedTime,
-      service: 'Formule Bronze - 50€'
-    };
-
+  
     try {
-      // Envoi de l'email via EmailJS
+      // Préparer le texte des options pour l'email
+      const optionsTexte = selectedOptions.length > 0
+        ? selectedOptions.map(optionId => {
+            const option = optionsDisponibles.find(opt => opt.id === optionId);
+            return `${option.nom} (+${option.prix}€)`;
+          }).join(', ')
+        : 'Aucune option supplémentaire';
+
+      // 1️⃣ FIREBASE: Bloquer le créneau dans le calendrier
+      await ajouterReservation(selectedDate, selectedTime, 'Bronze');
+      
+      // 2️⃣ EMAILJS: Envoyer l'email avec TOUTES les infos
+      const templateParams = {
+        from_name: `${formData.prenom} ${formData.nom}`,
+        from_email: formData.email,
+        phone: formData.telephone,
+        date: moment(selectedDate).format('DD/MM/YYYY'),
+        time: selectedTime,
+        service: 'Formule Bronze - 50€',
+        options: optionsTexte,
+        prix_total: `${calculerPrixTotal()}€`
+      };
+  
       await emailjs.send(
-        'service_1wryoqr',      // À remplacer
-        'template_x1vgr07',     // À remplacer
+        'service_1wryoqr',
+        'template_x1vgr07',
         templateParams,
-        'KUPBmz5lg0pubUDdW'       // À remplacer
+        'KUPBmz5lg0pubUDdW'
       );
       
       alert('Réservation confirmée ! Un email de confirmation vous a été envoyé.');
       
-      // Reset du formulaire
+      // Reset
       setFormData({ nom: "", prenom: "", email: "", telephone: "" });
       setSelectedDate(null);
       setSelectedTime("");
       setShowForm(false);
+      setSelectedOptions([]);
       
     } catch (error) {
-      console.error('Erreur lors de l\'envoi:', error);
-      alert('Erreur lors de l\'envoi. Veuillez réessayer.');
+      console.error('Erreur complète:', error);
+      alert(`Erreur lors de la réservation: ${error.message || 'Veuillez réessayer.'}`);
     } finally {
       setLoading(false);
     }
   };
+  const horairesDisponibles = selectedDate ? getHorairesDisponiblesForDate(selectedDate) : [];
+  const reservationsJour = selectedDate ? getReservationsParDate(selectedDate) : [];
 
   return (
     <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
@@ -133,7 +191,7 @@ function reserverOr() {
         <div style={{ height: "600px", marginTop: "1rem" }}>
           <Calendar
             localizer={localizer}
-            events={[]}
+            events={events}
             startAccessor="start"
             endAccessor="end"
             style={{ height: "100%" }}
@@ -149,6 +207,16 @@ function reserverOr() {
               today: "Aujourd'hui",
               month: "Mois"
             }}
+            eventPropGetter={(event) => ({
+              style: {
+                backgroundColor: '#2c5aa0',
+                borderRadius: '5px',
+                opacity: 0.8,
+                color: 'white',
+                border: '0px',
+                display: 'block'
+              }
+            })}
           />
         </div>
       </div>
@@ -165,32 +233,149 @@ function reserverOr() {
           <p style={{ marginBottom: "1rem", color: "#555", fontSize: "1.1rem" }}>
             📅 Date sélectionnée : <strong>{moment(selectedDate).format("dddd DD MMMM YYYY")}</strong>
           </p>
-          
+
+          {/* Afficher les réservations existantes */}
+          {reservationsJour.length > 0 && (
+            <div style={{ 
+              marginBottom: "1rem", 
+              padding: "1rem", 
+              background: "#fff3cd", 
+              borderRadius: "8px",
+              border: "1px solid #ffc107"
+            }}>
+              <strong>⚠️ Créneaux déjà réservés ce jour :</strong>
+              <div style={{ marginTop: "0.5rem" }}>
+                {reservationsJour.map(resa => (
+                  <span key={resa.id} style={{ 
+                    display: "inline-block",
+                    margin: "0.25rem",
+                    padding: "0.5rem",
+                    background: "#dc3545",
+                    color: "white",
+                    borderRadius: "5px",
+                    fontSize: "0.9rem"
+                  }}>
+                    {resa.heure} ({resa.formule})
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {horairesDisponibles.length === 0 ? (
+            <div style={{ 
+              padding: "2rem", 
+              textAlign: "center", 
+              background: "#f8d7da",
+              color: "#721c24",
+              borderRadius: "8px",
+              fontSize: "1.1rem"
+            }}>
+              ❌ Tous les créneaux sont réservés pour cette date. Veuillez choisir un autre jour.
+            </div>
+          ) : (
+            <div style={{ 
+              display: "grid", 
+              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", 
+              gap: "1rem",
+              marginTop: "1.5rem"
+            }}>
+              {horairesDisponibles.map((heure) => (
+                <button
+                  key={heure}
+                  onClick={() => handleTimeSelect(heure)}
+                  style={{
+                    padding: "1rem",
+                    border: selectedTime === heure ? "2px solid #2c5aa0" : "1px solid #ddd",
+                    background: selectedTime === heure ? "#2c5aa0" : "white",
+                    color: selectedTime === heure ? "white" : "#333",
+                    borderRadius: "8px",
+                    fontSize: "1.1rem",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    transition: "all 0.3s"
+                  }}
+                >
+                  {heure} ✓
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* OPTIONS SUPPLEMENTAIRES */}
+      {showForm && selectedTime && (
+        <div style={{ 
+          marginTop: "2rem", 
+          padding: "2rem", 
+          background: "#fff8e1", 
+          borderRadius: "12px",
+          border: "2px solid #ffc107"
+        }}>
+          <h2 style={{ color: "#2c5aa0", marginBottom: "1rem" }}>
+            Options supplémentaires
+          </h2>
+          <p style={{ color: "#666", marginBottom: "1.5rem" }}>
+            Améliorez votre prestation avec nos options premium
+          </p>
+
           <div style={{ 
             display: "grid", 
-            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", 
-            gap: "1rem",
-            marginTop: "1.5rem"
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", 
+            gap: "1rem"
           }}>
-            {horairesDispo.map((heure) => (
-              <button
-                key={heure}
-                onClick={() => handleTimeSelect(heure)}
+            {optionsDisponibles.map((option) => (
+              <div
+                key={option.id}
+                onClick={() => toggleOption(option.id)}
                 style={{
                   padding: "1rem",
-                  border: selectedTime === heure ? "2px solid #2c5aa0" : "1px solid #ddd",
-                  background: selectedTime === heure ? "#2c5aa0" : "white",
-                  color: selectedTime === heure ? "white" : "#333",
+                  border: selectedOptions.includes(option.id) 
+                    ? "2px solid #2c5aa0" 
+                    : "1px solid #ddd",
+                  background: selectedOptions.includes(option.id) 
+                    ? "#e3f2fd" 
+                    : "white",
                   borderRadius: "8px",
-                  fontSize: "1.1rem",
-                  fontWeight: "bold",
                   cursor: "pointer",
-                  transition: "all 0.3s"
+                  transition: "all 0.3s",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center"
                 }}
               >
-                {heure}
-              </button>
+                <div>
+                  <input
+                    type="checkbox"
+                    checked={selectedOptions.includes(option.id)}
+                    onChange={() => {}}
+                    style={{ marginRight: "0.5rem", cursor: "pointer" }}
+                  />
+                  <strong>{option.nom}</strong>
+                </div>
+                <span style={{ 
+                  color: "#2c5aa0", 
+                  fontWeight: "bold",
+                  fontSize: "1.1rem"
+                }}>
+                  +{option.prix}€
+                </span>
+              </div>
             ))}
+          </div>
+
+          <div style={{ 
+            marginTop: "1.5rem", 
+            padding: "1rem", 
+            background: "#2c5aa0",
+            color: "white",
+            borderRadius: "8px",
+            textAlign: "center",
+            fontSize: "1.3rem",
+            fontWeight: "bold"
+          }}>
+            Prix total : {calculerPrixTotal()}€
           </div>
         </div>
       )}
@@ -216,6 +401,14 @@ function reserverOr() {
             textAlign: "center"
           }}>
             <strong>Récapitulatif :</strong> {moment(selectedDate).format("DD/MM/YYYY")} à {selectedTime}
+            {selectedOptions.length > 0 && (
+              <div style={{ marginTop: "0.5rem", fontSize: "0.95rem" }}>
+                Options : {selectedOptions.map(optionId => {
+                  const option = optionsDisponibles.find(opt => opt.id === optionId);
+                  return option.nom;
+                }).join(', ')}
+              </div>
+            )}
           </div>
 
           <form onSubmit={handleSubmit}>
@@ -323,7 +516,7 @@ function reserverOr() {
                 transition: "background 0.3s"
               }}
             >
-              {loading ? "Envoi en cours..." : "Confirmer la réservation"}
+              {loading ? "Envoi en cours..." : `Confirmer la réservation - ${calculerPrixTotal()}€`}
             </button>
           </form>
         </div>
