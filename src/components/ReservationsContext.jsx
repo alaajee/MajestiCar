@@ -1,15 +1,15 @@
 // ReservationsContext.jsx - Firebase UNIQUEMENT pour le calendrier
 import { createContext, useContext, useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  query, 
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
   onSnapshot
 } from 'firebase/firestore';
 
-// ⚠️ Configuration Firebase - REMPLACEZ avec vos clés
+// Configuration Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBXwdQyFtYD0BzJ8LLkPPnpUihrrBh7oh8",
   authDomain: "majesti-car-14d12.firebaseapp.com",
@@ -19,8 +19,6 @@ const firebaseConfig = {
   appId: "1:488881200493:web:115f45c7e973f4a2718e64",
   measurementId: "G-0V84E9DXJZ"
 };
-
-
 
 // Initialiser Firebase
 const app = initializeApp(firebaseConfig);
@@ -40,10 +38,9 @@ export const ReservationsProvider = ({ children }) => {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 📡 SYNCHRONISATION EN TEMPS RÉEL avec Firebase
+  // Synchronisation en temps réel avec Firebase
   useEffect(() => {
     const q = query(collection(db, 'reservations'));
-    
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const reservationsData = [];
       snapshot.forEach((doc) => {
@@ -60,7 +57,7 @@ export const ReservationsProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // 💾 Ajouter une réservation dans Firebase (JUSTE date/heure/formule)
+  // Ajouter une réservation dans Firebase
   const ajouterReservation = async (date, heure, formule) => {
     try {
       const nouvelleReservation = {
@@ -69,9 +66,7 @@ export const ReservationsProvider = ({ children }) => {
         formule,
         timestamp: new Date().toISOString()
       };
-
       const docRef = await addDoc(collection(db, 'reservations'), nouvelleReservation);
-      
       return {
         id: docRef.id,
         ...nouvelleReservation
@@ -82,7 +77,7 @@ export const ReservationsProvider = ({ children }) => {
     }
   };
 
-  // ✅ Vérifier si un créneau est disponible
+  // Vérifier si un créneau est disponible
   const estDisponible = (date, heure) => {
     const dateStr = new Date(date).toDateString();
     return !reservations.some(resa => {
@@ -91,7 +86,7 @@ export const ReservationsProvider = ({ children }) => {
     });
   };
 
-  // 📅 Obtenir toutes les réservations pour une date
+  // Obtenir toutes les réservations pour une date
   const getReservationsParDate = (date) => {
     const dateStr = new Date(date).toDateString();
     return reservations.filter(resa => {
@@ -100,7 +95,7 @@ export const ReservationsProvider = ({ children }) => {
     });
   };
 
-  // ⏰ Obtenir les horaires disponibles pour une date
+  // Obtenir les horaires disponibles pour une date
   const getHorairesDisponibles = (date) => {
     const tousLesHoraires = [
       "09:00", "10:00", "11:00", "12:00",
@@ -125,4 +120,6 @@ export const ReservationsProvider = ({ children }) => {
   );
 };
 
+// Exporter db pour utilisation dans d'autres fichiers
+export { db };
 export default ReservationsContext;

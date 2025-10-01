@@ -6,6 +6,8 @@ import moment from "moment";
 import "moment/locale/fr";
 import emailjs from "emailjs-com";
 import { useReservations } from './ReservationsContext';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from './ReservationsContext';
 
 moment.locale('fr');
 const localizer = momentLocalizer(moment);
@@ -151,12 +153,12 @@ function reserverBronze() {
         payment_status: '💵 Paiement sur place'
       };
 
-      await emailjs.send(
-        'service_1wryoqr',
-        'template_x1vgr07',
-        templateParams,
-        'KUPBmz5lg0pubUDdW'
-      );
+      // await emailjs.send(
+      //   'service_1wryoqr',
+      //   'template_x1vgr07',
+      //   templateParams,
+      //   'KUPBmz5lg0pubUDdW'
+      // );
 
       // Rediriger vers une page de confirmation
       const reservationData = {
@@ -183,10 +185,9 @@ function reserverBronze() {
     }
   };
 
-  // Paiement en ligne avec Stripe
   const handleStripePayment = async (e) => {
     e.preventDefault();
-    
+  
     if (!selectedDate || !selectedTime) {
       alert("Veuillez sélectionner une date et une heure");
       return;
@@ -208,43 +209,75 @@ function reserverBronze() {
   
     try {
       const prixTotal = calculerPrixTotal();
-      
+  
       const optionsTexte = selectedOptions.length > 0
         ? selectedOptions.map(optionId => {
             const option = optionsDisponibles.find(opt => opt.id === optionId);
             return `${option.nom} (+${option.prix}€)`;
-          }).join(', ')
-        : 'Aucune option supplémentaire';
+          }).join(", ")
+        : "Aucune option supplémentaire";
   
-      const reservationData = JSON.stringify({
+      const pendingId = `pending_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+      const reservationData = {
         nom: formData.nom,
         prenom: formData.prenom,
         email: formData.email,
         telephone: formData.telephone,
-        date: moment(selectedDate).format('DD/MM/YYYY'),
+        date: moment(selectedDate).format("DD/MM/YYYY"),
         dateISO: selectedDate.toISOString(),
         heure: selectedTime,
+        formule: "Bronze",
         options: selectedOptions,
         optionsTexte: optionsTexte,
-        formule: 'Bronze',
         prixTotal: prixTotal,
-        paymentMethod: 'stripe'
-      });
+        status: "pending",
+        createdAt: new Date().toISOString(),
+        paymentMethod: "stripe"
+      };
   
-      // Sauvegarder dans sessionStorage pour récupérer après Stripe
-      sessionStorage.setItem('pendingReservation', reservationData);
+      // 🔹 1) Sauvegarder la réservation en attente dans Firestore
+      await setDoc(doc(db, "pendingReservations", pendingId), reservationData);
   
-      const paymentLinkBase = 'https://buy.stripe.com/test_4gMeVfbagad7bLxbSi1oI01';
-      const paymentUrl = `${paymentLinkBase}?prefilled_email=${encodeURIComponent(formData.email)}`;
-      
+      // 🔹 2) Envoyer l’email avec EmailJS
+      const templateParams = {
+        from_name: `${formData.prenom} ${formData.nom}`,
+        from_email: formData.email,
+        phone: formData.telephone,
+        date: moment(selectedDate).format("DD/MM/YYYY"),
+        time: selectedTime,
+        service: `Formule Bronze - 50€`,
+        options: optionsTexte,
+        prix_total: `${prixTotal}€`,
+        payment_status: "💳 Paiement en ligne (Stripe)"
+      };
+  
+      await emailjs.send(
+        "service_1wryoqr",   
+        "template_x1vgr07",  
+        templateParams,
+        "KUPBmz5lg0pubUDdW" 
+      );
+  
+      console.log("📧 Email envoyé avec succès");
+  
+      // 🔹 3) Rediriger vers Stripe
+      const paymentLinkBase = "https://buy.stripe.com/test_4gMeVfbagad7bLxbSi1oI01";
+      const successUrl = encodeURIComponent(
+        `https://alaajee.github.io/MugiWash/reservation-success?payment=stripe&reservationId=${pendingId}`
+      );
+  
+      const paymentUrl = `${paymentLinkBase}?prefilled_email=${encodeURIComponent(formData.email)}&success_url=${successUrl}`;
+  
       window.location.href = paymentUrl;
-      
+  
     } catch (error) {
-      console.error('Erreur complète:', error);
-      alert(`Erreur lors du paiement: ${error.message || 'Veuillez réessayer.'}`);
+      console.error("Erreur:", error);
+      alert(`Erreur lors du paiement: ${error.message || "Veuillez réessayer."}`);
       setLoading(false);
     }
   };
+  
 
   const horairesDisponibles = selectedDate ? getHorairesDisponiblesForDate(selectedDate) : [];
   const reservationsJour = selectedDate ? getReservationsParDate(selectedDate) : [];

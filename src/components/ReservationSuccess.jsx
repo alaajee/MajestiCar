@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useReservations } from './ReservationsContext';
+import { doc, getDoc, deleteDoc } from 'firebase/firestore'; // ✅ Import ajouté
+import { db } from './ReservationsContext'; // ✅ Import ajouté
 import emailjs from 'emailjs-com';
 import moment from 'moment';
 import 'moment/locale/fr';
@@ -10,6 +12,7 @@ moment.locale('fr');
 function ReservationSuccess() {
   const [searchParams] = useSearchParams();
   const { ajouterReservation } = useReservations();
+  const hasProcessed = useRef(false);
   
   const [status, setStatus] = useState('loading');
   const [reservationInfo, setReservationInfo] = useState(null);
@@ -17,42 +20,66 @@ function ReservationSuccess() {
 
   useEffect(() => {
     const finaliserReservation = async () => {
-      if (hasProcessed.current) return;
+      if (hasProcessed.current) {
+        console.log('⚠️ Traitement déjà effectué, ignorer');
+        return;
+      }
       hasProcessed.current = true;
       
+      console.log('🚀 Début de la finalisation...');
+      
       try {
-        // Essayer de récupérer depuis l'URL
-        let dataParam = searchParams.get('data');
         const paymentType = searchParams.get('payment');
+        console.log('💳 Type de paiement:', paymentType);
         
-        // Si pas dans l'URL, récupérer depuis sessionStorage
-        if (!dataParam && paymentType === 'stripe') {
-          dataParam = sessionStorage.getItem('pendingReservation');
-          sessionStorage.removeItem('pendingReservation'); // Nettoyer
+        let data;
+  
+        // Si paiement Stripe, récupérer depuis Firestore
+        if (paymentType === 'stripe') {
+          console.log('📦 Récupération depuis Firestore...');
+          
+        } 
+        // Si paiement cash, récupérer depuis URL
+        else {
+          console.log('📦 Récupération depuis URL...');
+          const dataParam = searchParams.get('data');
+          
+          if (!dataParam) {
+            console.error('❌ Paramètre data manquant dans URL');
+            setStatus('error');
+            return;
+          }
+          
+          try {
+            data = JSON.parse(dataParam);
+          } catch (e) {
+            console.log('⚠️ Tentative avec decodeURIComponent...');
+            try {
+              data = JSON.parse(decodeURIComponent(dataParam));
+            } catch (err) {
+              console.error('❌ Erreur de parsing JSON:', err);
+              setStatus('error');
+              return;
+            }
+          }
+          console.log('✅ Données récupérées:', data);
         }
   
-        if (!dataParam) {
-          setStatus('error');
-          return;
-        }
-  
-        const data = typeof dataParam === 'string' 
-          ? JSON.parse(dataParam.startsWith('%') ? decodeURIComponent(dataParam) : dataParam)
-          : dataParam;
-        
         setReservationInfo(data);
-        
-        const isCash = paymentType === 'cash' || data.paymentMethod === 'cash';
+        const isCash = paymentType === 'cash';
         setIsCashPayment(isCash);
   
-        // Enregistrer la réservation
+        // Enregistrer la réservation dans Firebase
+        console.log('💾 Enregistrement dans Firebase...');
         await ajouterReservation(
           new Date(data.dateISO), 
           data.heure, 
           data.formule
         );
+        console.log('✅ Réservation enregistrée dans Firebase');
   
-        // Envoyer l'email
+        // Envoyer l'email de confirmation
+        console.log('📧 Envoi de l\'email...');
         const paymentStatus = isCash ? '💵 Paiement sur place' : '✅ Payé via Stripe';
   
         const templateParams = {
@@ -67,24 +94,29 @@ function ReservationSuccess() {
           payment_status: paymentStatus
         };
   
-        await emailjs.send(
+        console.log('📤 Paramètres email:', templateParams);
+  
+        const emailResult = await emailjs.send(
           'service_1wryoqr',
           'template_x1vgr07',
           templateParams,
           'KUPBmz5lg0pubUDdW'
         );
-  
+        
+        console.log('✅ Email envoyé avec succès:', emailResult);
         setStatus('success');
   
       } catch (error) {
-        console.error('Erreur:', error);
+        console.error('❌ Erreur lors de la finalisation:', error);
+        console.error('Détails:', error.message);
+        console.error('Stack:', error.stack);
         setStatus('error');
       }
     };
   
     finaliserReservation();
-  }, [searchParams]);
-  
+  }, [searchParams, ajouterReservation]);
+
   if (status === 'loading') {
     return (
       <div style={{
@@ -170,6 +202,8 @@ function ReservationSuccess() {
           }}>
             <p style={{ margin: 0, color: '#856404', fontWeight: 'bold' }}>
               📧 Nous vous contacterons sous peu pour confirmer votre réservation.
+              <br />
+              Consultez la console (F12) pour plus de détails.
             </p>
           </div>
           <Link
