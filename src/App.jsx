@@ -36,9 +36,9 @@ function App() {
       </div>
       <header className="App-header">
         <div className="menu-container">
-          <img src={image2} alt="Logo MugiWash" className="menu-logo" />
+          <img src={image2} alt="Logo MajestiCar" className="menu-logo" />
           
-          <a href="/MugiWash" className="menu-item">Home</a>
+          <a href="/MajestiCar" className="menu-item">Home</a>
           <a onClick={scrollToApropos} className="menu-item">A propos</a>
           <a onClick={scrollToServices} className="menu-item">Services</a>
           <a onClick={scrollToContact} className="menu-item">Contact</a>
@@ -195,9 +195,6 @@ function App() {
           <p>&copy; 2025 Majesti'Car. Tous droits réservés.</p>
         </div>
       </footer>
-
-
-
     </div>
   )
 }
