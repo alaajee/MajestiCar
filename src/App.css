@@ -395,8 +395,13 @@ html, body {
   
   .Mes_services {
     bottom: 20px;
-
   }
+
+  .Button_services {
+    padding: 10px 20px;
+    font-size: 1rem;  
+  }
+  
   
 }
 
