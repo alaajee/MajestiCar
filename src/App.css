@@ -522,20 +522,6 @@ html, body {
   background: linear-gradient(90deg, #cd7f32 0%, #daa520 100%);
 }
 
-.select-button {
-  background-color: blue; /* Bleu clair */
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 20px;
-  text-decoration: none;
-  display: inline-block;
-}
-
 .service.argent::before {
   background: linear-gradient(90deg, #c0c0c0 0%, #e5e5e5 100%);
 }
@@ -569,6 +555,149 @@ html, body {
   color: #daa520;
 }
 
+/* Style pour les listes de features */
+.service .features {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.service .features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* FORMULE BRONZE - Toutes les features avec coche verte */
+.service.bronze .features li::before {
+  content: "✓";
+  color: #28a745;
+  font-weight: bold;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* FORMULE ARGENT - Points gris pour les 4 premières, coches vertes pour les autres */
+.service.argent .features li::before {
+  content: "✓";
+  color: #28a745;
+  font-weight: bold;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.service.argent .features li:nth-child(1)::before,
+.service.argent .features li:nth-child(2)::before,
+.service.argent .features li:nth-child(3)::before,
+.service.argent .features li:nth-child(4)::before {
+  content: "●";
+  color: #999;
+  font-size: 0.8rem;
+}
+
+
+/* FORMULE OR - Points gris pour les features de Bronze et Argent, coches vertes pour les nouvelles */
+.service.or .features li::before {
+  content: "✓";
+  color: #28a745;
+  font-weight: bold;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.service.or .features li:nth-child(1)::before,
+.service.or .features li:nth-child(2)::before,
+.service.or .features li:nth-child(3)::before,
+.service.or .features li:nth-child(4)::before,
+.service.or .features li:nth-child(5)::before,
+.service.or .features li:nth-child(6)::before,
+.service.or .features li:nth-child(7)::before {
+  content: "●";
+  color: #999;
+  font-size: 0.8rem;
+}
+
+
+/* Style pour la section option */
+.service .option {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.service .option h4 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+}
+
+.service.bronze .option h4 {
+  color: #cd7f32;
+}
+
+.service.argent .option h4 {
+  color: #757575;
+}
+
+.service .option p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.service .option em {
+  font-size: 0.85rem;
+  color: #666;
+  display: block;
+  margin-top: 5px;
+}
+
+/* Style pour le prix */
+.service .price {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.service.bronze .price {
+  color: #cd7f32;
+}
+
+.service.argent .price {
+  color: #757575;
+}
+
+.service.or .price {
+  color: #daa520;
+}
+
+/* Bouton de sélection */
+.select-button {
+  background-color: blue;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 1.1rem;
+  width: 100%;
+  text-align: center;
+}
+
+.select-button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 255, 0.3);
+}
 .price {
   text-align: center;
   font-size: 3rem;

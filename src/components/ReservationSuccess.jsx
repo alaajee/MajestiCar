@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useReservations } from './ReservationsContext';
-import { doc, getDoc, deleteDoc } from 'firebase/firestore'; // ✅ Import ajouté
-import { db } from './ReservationsContext'; // ✅ Import ajouté
+import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { db } from './ReservationsContext';
 import emailjs from 'emailjs-com';
 import moment from 'moment';
 import 'moment/locale/fr';
@@ -12,7 +12,6 @@ moment.locale('fr');
 function ReservationSuccess() {
   const [searchParams] = useSearchParams();
   const { ajouterReservation } = useReservations();
-  const hasProcessed = useRef(false);
   
   const [status, setStatus] = useState('loading');
   const [reservationInfo, setReservationInfo] = useState(null);
@@ -20,11 +19,22 @@ function ReservationSuccess() {
 
   useEffect(() => {
     const finaliserReservation = async () => {
-      if (hasProcessed.current) {
-        console.log('⚠️ Traitement déjà effectué, ignorer');
+      // 🔹 Créer un identifiant unique pour cette réservation
+      const reservationId = searchParams.get('reservationId') || searchParams.get('data')?.substring(0, 50);
+      const storageKey = `reservation_processed_${reservationId}`;
+      
+      // 🔹 Vérifier si déjà traité (persiste même après remontage du composant)
+      if (sessionStorage.getItem(storageKey)) {
+        console.log('⚠️ Réservation déjà traitée, chargement des données...');
+        const savedData = sessionStorage.getItem(`reservation_data_${reservationId}`);
+        if (savedData) {
+          const data = JSON.parse(savedData);
+          setReservationInfo(data);
+          setIsCashPayment(data.paymentMethod === 'cash');
+          setStatus('success');
+        }
         return;
       }
-      hasProcessed.current = true;
       
       console.log('🚀 Début de la finalisation...');
       
@@ -37,7 +47,29 @@ function ReservationSuccess() {
         // Si paiement Stripe, récupérer depuis Firestore
         if (paymentType === 'stripe') {
           console.log('📦 Récupération depuis Firestore...');
+          const pendingId = searchParams.get('reservationId');
           
+          if (!pendingId) {
+            console.error('❌ ID de réservation manquant');
+            setStatus('error');
+            return;
+          }
+
+          const docRef = doc(db, 'pendingReservations', pendingId);
+          const docSnap = await getDoc(docRef);
+          
+          if (!docSnap.exists()) {
+            console.error('❌ Réservation non trouvée dans Firestore');
+            setStatus('error');
+            return;
+          }
+          
+          data = docSnap.data();
+          console.log('✅ Données récupérées depuis Firestore:', data);
+          
+          // Supprimer la réservation pending après récupération
+          await deleteDoc(docRef);
+          console.log('🗑️ Réservation pending supprimée');
         } 
         // Si paiement cash, récupérer depuis URL
         else {
@@ -69,6 +101,10 @@ function ReservationSuccess() {
         const isCash = paymentType === 'cash';
         setIsCashPayment(isCash);
   
+        // 🔹 Marquer comme traité AVANT les opérations
+        sessionStorage.setItem(storageKey, 'true');
+        sessionStorage.setItem(`reservation_data_${reservationId}`, JSON.stringify(data));
+  
         // Enregistrer la réservation dans Firebase
         console.log('💾 Enregistrement dans Firebase...');
         await ajouterReservation(
@@ -96,26 +132,27 @@ function ReservationSuccess() {
   
         console.log('📤 Paramètres email:', templateParams);
   
-        const emailResult = await emailjs.send(
+        await emailjs.send(
           'service_1wryoqr',
           'template_x1vgr07',
           templateParams,
           'KUPBmz5lg0pubUDdW'
         );
         
-        console.log('✅ Email envoyé avec succès:', emailResult);
+        console.log('✅ Email envoyé avec succès');
         setStatus('success');
   
       } catch (error) {
         console.error('❌ Erreur lors de la finalisation:', error);
         console.error('Détails:', error.message);
-        console.error('Stack:', error.stack);
         setStatus('error');
+        // 🔹 En cas d'erreur, retirer le flag pour permettre un retry
+        sessionStorage.removeItem(storageKey);
       }
     };
   
     finaliserReservation();
-  }, [searchParams, ajouterReservation]);
+  }, []); // 🔹 IMPORTANT: Tableau vide pour n'exécuter qu'une seule fois
 
   if (status === 'loading') {
     return (
@@ -178,12 +215,7 @@ function ReservationSuccess() {
           maxWidth: '600px',
           boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
         }}>
-          <div style={{
-            fontSize: '5rem',
-            marginBottom: '1rem'
-          }}>
-            ⚠️
-          </div>
+          <div style={{ fontSize: '5rem', marginBottom: '1rem' }}>⚠️</div>
           <h1 style={{ color: '#dc3545', marginBottom: '1rem' }}>
             Une erreur s'est produite
           </h1>
@@ -201,7 +233,7 @@ function ReservationSuccess() {
             border: '2px solid #ffc107'
           }}>
             <p style={{ margin: 0, color: '#856404', fontWeight: 'bold' }}>
-              📧 Nous vous contacterons sous peu pour confirmer votre réservation.
+              Nous vous contacterons sous peu pour confirmer votre réservation.
               <br />
               Consultez la console (F12) pour plus de détails.
             </p>
@@ -288,39 +320,39 @@ function ReservationSuccess() {
               textAlign: 'center',
               fontSize: '1.5rem'
             }}>
-              📋 Récapitulatif de votre réservation
+              Récapitulatif de votre réservation
             </h2>
 
             <div style={{ marginBottom: '1rem' }}>
-              <strong style={{ color: '#2c5aa0' }}>👤 Client :</strong>
+              <strong style={{ color: '#2c5aa0' }}>Client :</strong>
               <p style={{ margin: '0.5rem 0', color: '#333' }}>
                 {reservationInfo.prenom} {reservationInfo.nom}
               </p>
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
-              <strong style={{ color: '#2c5aa0' }}>📧 Email :</strong>
+              <strong style={{ color: '#2c5aa0' }}>Email :</strong>
               <p style={{ margin: '0.5rem 0', color: '#333' }}>
                 {reservationInfo.email}
               </p>
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
-              <strong style={{ color: '#2c5aa0' }}>📞 Téléphone :</strong>
+              <strong style={{ color: '#2c5aa0' }}>Téléphone :</strong>
               <p style={{ margin: '0.5rem 0', color: '#333' }}>
                 {reservationInfo.telephone}
               </p>
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
-              <strong style={{ color: '#2c5aa0' }}>📅 Date et heure :</strong>
+              <strong style={{ color: '#2c5aa0' }}>Date et heure :</strong>
               <p style={{ margin: '0.5rem 0', color: '#333', fontSize: '1.1rem' }}>
                 {reservationInfo.date} à {reservationInfo.heure}
               </p>
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
-              <strong style={{ color: '#2c5aa0' }}>🚗 Formule :</strong>
+              <strong style={{ color: '#2c5aa0' }}>Formule :</strong>
               <p style={{ margin: '0.5rem 0', color: '#333' }}>
                 {reservationInfo.formule} (50€)
               </p>
@@ -328,7 +360,7 @@ function ReservationSuccess() {
 
             {reservationInfo.options && reservationInfo.options.length > 0 && (
               <div style={{ marginBottom: '1rem' }}>
-                <strong style={{ color: '#2c5aa0' }}>➕ Options :</strong>
+                <strong style={{ color: '#2c5aa0' }}>Options :</strong>
                 <p style={{ margin: '0.5rem 0', color: '#333' }}>
                   {reservationInfo.optionsTexte}
                 </p>
@@ -346,8 +378,8 @@ function ReservationSuccess() {
               fontWeight: 'bold'
             }}>
               {isCashPayment 
-                ? `💵 À payer sur place : ${reservationInfo.prixTotal}€`
-                : `💳 Total payé : ${reservationInfo.prixTotal}€`
+                ? `À payer sur place : ${reservationInfo.prixTotal}€`
+                : `Total payé : ${reservationInfo.prixTotal}€`
               }
             </div>
           </div>
@@ -367,10 +399,10 @@ function ReservationSuccess() {
               fontSize: '1rem',
               lineHeight: '1.6'
             }}>
-              💰 <strong>N'oubliez pas :</strong> Le paiement de {reservationInfo?.prixTotal}€ 
+              <strong>N'oubliez pas :</strong> Le paiement de {reservationInfo?.prixTotal}€ 
               sera à effectuer sur place le jour de votre rendez-vous.
               <br />
-              📨 Un email de confirmation a été envoyé à <strong>{reservationInfo?.email}</strong>
+              Un email de confirmation a été envoyé à <strong>{reservationInfo?.email}</strong>
             </p>
           </div>
         ) : (
@@ -387,7 +419,7 @@ function ReservationSuccess() {
               fontSize: '1rem',
               lineHeight: '1.6'
             }}>
-              📨 Un email de confirmation a été envoyé à <strong>{reservationInfo?.email}</strong>
+              Un email de confirmation a été envoyé à <strong>{reservationInfo?.email}</strong>
               <br />
               Nous avons hâte de vous accueillir !
             </p>
@@ -401,7 +433,7 @@ function ReservationSuccess() {
           flexWrap: 'wrap'
         }}>
           <Link
-            to="/MugiWash"
+            to="/"
             style={{
               padding: '1rem 2rem',
               background: '#2c5aa0',
@@ -415,26 +447,10 @@ function ReservationSuccess() {
             onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
             onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
           >
-            🏠 Retour à l'accueil
+            Retour à l'accueil
           </Link>
 
-          <Link
-            to="/mes-reservations"
-            style={{
-              padding: '1rem 2rem',
-              background: '#6c757d',
-              color: 'white',
-              textDecoration: 'none',
-              borderRadius: '10px',
-              fontWeight: 'bold',
-              fontSize: '1.1rem',
-              transition: 'transform 0.2s'
-            }}
-            onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-            onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-          >
-            📋 Voir mes réservations
-          </Link>
+        
         </div>
       </div>
 

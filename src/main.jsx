@@ -10,6 +10,7 @@ import ReserverOr from './components/reserverOr.jsx'
 import { ReservationsProvider } from './components/ReservationsContext.jsx'
 import ReservationSuccess from './components/ReservationSuccess';
 import PaymentConfirmation from './components/PaymentConfirmation.jsx';
+
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(

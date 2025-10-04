@@ -26,7 +26,7 @@ function reserverBronze() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState(""); // "stripe" ou "cash"
+  const [paymentMethod, setPaymentMethod] = useState("");
   
   const [formData, setFormData] = useState({
     nom: "",
@@ -104,7 +104,6 @@ function reserverBronze() {
     return prixBase + prixOptions;
   };
 
-  // Paiement sur place
   const handleCashPayment = async (e) => {
     e.preventDefault();
     
@@ -137,10 +136,8 @@ function reserverBronze() {
           }).join(', ')
         : 'Aucune option supplémentaire';
 
-      // Enregistrer la réservation dans Firebase
       await ajouterReservation(selectedDate, selectedTime, 'Bronze');
 
-      // Envoyer l'email de confirmation
       const templateParams = {
         from_name: `${formData.prenom} ${formData.nom}`,
         from_email: formData.email,
@@ -153,14 +150,6 @@ function reserverBronze() {
         payment_status: '💵 Paiement sur place'
       };
 
-      // await emailjs.send(
-      //   'service_1wryoqr',
-      //   'template_x1vgr07',
-      //   templateParams,
-      //   'KUPBmz5lg0pubUDdW'
-      // );
-
-      // Rediriger vers une page de confirmation
       const reservationData = {
         nom: formData.nom,
         prenom: formData.prenom,
@@ -236,10 +225,8 @@ function reserverBronze() {
         paymentMethod: "stripe"
       };
   
-      // 🔹 1) Sauvegarder la réservation en attente dans Firestore
       await setDoc(doc(db, "pendingReservations", pendingId), reservationData);
   
-      // 🔹 2) Envoyer l’email avec EmailJS
       const templateParams = {
         from_name: `${formData.prenom} ${formData.nom}`,
         from_email: formData.email,
@@ -261,7 +248,6 @@ function reserverBronze() {
   
       console.log("📧 Email envoyé avec succès");
   
-      // 🔹 3) Rediriger vers Stripe
       const paymentLinkBase = "https://buy.stripe.com/test_eVq00ldio4SNaHt3lM1oI02";
       const successUrl = encodeURIComponent(
         `https://alaajee.github.io/MugiWash/reservation-success?payment=stripe&reservationId=${pendingId}`
@@ -278,21 +264,150 @@ function reserverBronze() {
     }
   };
   
-
   const horairesDisponibles = selectedDate ? getHorairesDisponiblesForDate(selectedDate) : [];
   const reservationsJour = selectedDate ? getReservationsParDate(selectedDate) : [];
 
   return (
     <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
+      <style>{`
+        .rbc-calendar {
+          transition: all 0.3s ease;
+        }
+        .rbc-day-bg {
+          transition: background-color 0.2s ease;
+        }
+        .rbc-day-bg:hover {
+          background-color: #f0f7ff !important;
+          cursor: pointer;
+        }
+        .rbc-selected {
+          background-color: #2c5aa0 !important;
+        }
+        .rbc-today {
+          background-color: #e3f2fd;
+        }
+        .rbc-off-range-bg {
+          background-color: #fafafa;
+        }
+        .rbc-date-cell {
+          padding: 8px;
+          transition: all 0.2s ease;
+        }
+        .rbc-date-cell:hover {
+          transform: scale(1.05);
+        }
+        .rbc-button-link {
+          transition: color 0.2s ease;
+        }
+        .rbc-button-link:hover {
+          color: #2c5aa0;
+        }
+        .rbc-active {
+          background-color: #2c5aa0 !important;
+          color: white !important;
+          box-shadow: 0 2px 8px rgba(44, 90, 160, 0.3);
+        }
+        .rbc-toolbar button {
+          transition: all 0.2s ease;
+          border-radius: 6px;
+        }
+        .rbc-toolbar button:hover {
+          background-color: #2c5aa0;
+          color: white;
+          transform: translateY(-1px);
+        }
+      `}</style>
+
       <h1 style={{ textAlign: "center", color: "#2c5aa0", marginBottom: "2rem" }}>
         Réservation Formule Bronze - 50€
       </h1>
 
-      {/* CALENDRIER */}
+      {/* ÉTAPE 1 : OPTIONS SUPPLÉMENTAIRES */}
+      <div style={{ 
+        marginTop: "2rem", 
+        padding: "2rem", 
+        background: "#fff8e1", 
+        borderRadius: "12px",
+        border: "2px solid #ffc107"
+      }}>
+        <h2 style={{ color: "#2c5aa0", marginBottom: "1rem" }}>
+          Étape 1 : Options supplémentaires (facultatif)
+        </h2>
+        <p style={{ color: "#666", marginBottom: "1.5rem" }}>
+          Améliorez votre prestation avec nos options premium
+        </p>
+
+        <div style={{ 
+          display: "grid", 
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", 
+          gap: "1rem"
+        }}>
+          {optionsDisponibles.map((option) => (
+            <div
+              key={option.id}
+              onClick={() => toggleOption(option.id)}
+              style={{
+                padding: "1rem",
+                border: selectedOptions.includes(option.id) 
+                  ? "2px solid #2c5aa0" 
+                  : "1px solid #ddd",
+                background: selectedOptions.includes(option.id) 
+                  ? "#e3f2fd" 
+                  : "white",
+                borderRadius: "8px",
+                cursor: "pointer",
+                transition: "all 0.3s",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                transform: selectedOptions.includes(option.id) ? "scale(1.02)" : "scale(1)"
+              }}
+            >
+              <div>
+                <input
+                  type="checkbox"
+                  checked={selectedOptions.includes(option.id)}
+                  onChange={() => {}}
+                  style={{ marginRight: "0.5rem", cursor: "pointer" }}
+                />
+                <strong>{option.nom}</strong>
+              </div>
+              <span style={{ 
+                color: "#2c5aa0", 
+                fontWeight: "bold",
+                fontSize: "1.1rem"
+              }}>
+                +{option.prix}€
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ 
+          marginTop: "1.5rem", 
+          padding: "1rem", 
+          background: "#2c5aa0",
+          color: "white",
+          borderRadius: "8px",
+          textAlign: "center",
+          fontSize: "1.3rem",
+          fontWeight: "bold"
+        }}>
+          Prix total : {calculerPrixTotal()}€
+        </div>
+      </div>
+
+      {/* ÉTAPE 2 : CALENDRIER */}
       <div style={{ marginTop: "2rem" }}>
-        <h2 style={{ color: "#2c5aa0" }}>Étape 1 : Sélectionnez une date</h2>
+        <h2 style={{ color: "#2c5aa0" }}>Étape 2 : Sélectionnez une date</h2>
         
-        <div style={{ height: "600px", marginTop: "1rem" }}>
+        <div style={{ 
+          height: "600px", 
+          marginTop: "1rem",
+          borderRadius: "12px",
+          overflow: "hidden",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+        }}>
           <Calendar
             localizer={localizer}
             events={events}
@@ -311,6 +426,21 @@ function reserverBronze() {
               today: "Aujourd'hui",
               month: "Mois"
             }}
+            dayPropGetter={(date) => {
+              const dateString = moment(date).format('YYYY-MM-DD');
+              const selectedDateString = selectedDate ? moment(selectedDate).format('YYYY-MM-DD') : null;
+              
+              if (dateString === selectedDateString) {
+                return {
+                  className: 'rbc-selected',
+                  style: {
+                    backgroundColor: '#2c5aa0',
+                    color: 'white'
+                  }
+                };
+              }
+              return {};
+            }}
             eventPropGetter={(event) => ({
               style: {
                 backgroundColor: '#2c5aa0',
@@ -325,15 +455,16 @@ function reserverBronze() {
         </div>
       </div>
 
-      {/* SELECTION HEURE */}
+      {/* ÉTAPE 3 : SELECTION HEURE */}
       {selectedDate && (
         <div style={{ 
           marginTop: "2rem", 
           padding: "2rem", 
           background: "#f9f9f9", 
-          borderRadius: "12px" 
+          borderRadius: "12px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
         }}>
-          <h2 style={{ color: "#2c5aa0" }}>Étape 2 : Choisissez une heure</h2>
+          <h2 style={{ color: "#2c5aa0" }}>Étape 3 : Choisissez une heure</h2>
           <p style={{ marginBottom: "1rem", color: "#555", fontSize: "1.1rem" }}>
             📅 Date sélectionnée : <strong>{moment(selectedDate).format("dddd DD MMMM YYYY")}</strong>
           </p>
@@ -396,7 +527,8 @@ function reserverBronze() {
                     fontSize: "1.1rem",
                     fontWeight: "bold",
                     cursor: "pointer",
-                    transition: "all 0.3s"
+                    transition: "all 0.3s",
+                    transform: selectedTime === heure ? "scale(1.05)" : "scale(1)"
                   }}
                 >
                   {heure} ✓
@@ -407,83 +539,7 @@ function reserverBronze() {
         </div>
       )}
 
-      {/* OPTIONS SUPPLEMENTAIRES */}
-      {showForm && selectedTime && (
-        <div style={{ 
-          marginTop: "2rem", 
-          padding: "2rem", 
-          background: "#fff8e1", 
-          borderRadius: "12px",
-          border: "2px solid #ffc107"
-        }}>
-          <h2 style={{ color: "#2c5aa0", marginBottom: "1rem" }}>
-            Options supplémentaires
-          </h2>
-          <p style={{ color: "#666", marginBottom: "1.5rem" }}>
-            Améliorez votre prestation avec nos options premium
-          </p>
-
-          <div style={{ 
-            display: "grid", 
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", 
-            gap: "1rem"
-          }}>
-            {optionsDisponibles.map((option) => (
-              <div
-                key={option.id}
-                onClick={() => toggleOption(option.id)}
-                style={{
-                  padding: "1rem",
-                  border: selectedOptions.includes(option.id) 
-                    ? "2px solid #2c5aa0" 
-                    : "1px solid #ddd",
-                  background: selectedOptions.includes(option.id) 
-                    ? "#e3f2fd" 
-                    : "white",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  transition: "all 0.3s",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center"
-                }}
-              >
-                <div>
-                  <input
-                    type="checkbox"
-                    checked={selectedOptions.includes(option.id)}
-                    onChange={() => {}}
-                    style={{ marginRight: "0.5rem", cursor: "pointer" }}
-                  />
-                  <strong>{option.nom}</strong>
-                </div>
-                <span style={{ 
-                  color: "#2c5aa0", 
-                  fontWeight: "bold",
-                  fontSize: "1.1rem"
-                }}>
-                  +{option.prix}€
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ 
-            marginTop: "1.5rem", 
-            padding: "1rem", 
-            background: "#2c5aa0",
-            color: "white",
-            borderRadius: "8px",
-            textAlign: "center",
-            fontSize: "1.3rem",
-            fontWeight: "bold"
-          }}>
-            Prix total : {calculerPrixTotal()}€
-          </div>
-        </div>
-      )}
-
-      {/* FORMULAIRE */}
+      {/* ÉTAPE 4 : FORMULAIRE */}
       {showForm && selectedTime && (
         <div style={{ 
           marginTop: "2rem", 
@@ -493,7 +549,7 @@ function reserverBronze() {
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
         }}>
           <h2 style={{ color: "#2c5aa0", marginBottom: "1.5rem" }}>
-            Étape 3 : Vos informations
+            Étape 4 : Vos informations
           </h2>
 
           <div style={{ 
@@ -536,7 +592,8 @@ function reserverBronze() {
                     padding: "12px",
                     border: "1px solid #ddd",
                     borderRadius: "8px",
-                    fontSize: "1rem"
+                    fontSize: "1rem",
+                    transition: "border 0.3s"
                   }}
                 />
               </div>
@@ -556,7 +613,8 @@ function reserverBronze() {
                     padding: "12px",
                     border: "1px solid #ddd",
                     borderRadius: "8px",
-                    fontSize: "1rem"
+                    fontSize: "1rem",
+                    transition: "border 0.3s"
                   }}
                 />
               </div>
@@ -577,7 +635,8 @@ function reserverBronze() {
                   padding: "12px",
                   border: "1px solid #ddd",
                   borderRadius: "8px",
-                  fontSize: "1rem"
+                  fontSize: "1rem",
+                  transition: "border 0.3s"
                 }}
               />
             </div>
@@ -598,7 +657,8 @@ function reserverBronze() {
                   padding: "12px",
                   border: "1px solid #ddd",
                   borderRadius: "8px",
-                  fontSize: "1rem"
+                  fontSize: "1rem",
+                  transition: "border 0.3s"
                 }}
               />
             </div>
@@ -624,7 +684,8 @@ function reserverBronze() {
                     background: paymentMethod === "stripe" ? "#f7f6ff" : "white",
                     borderRadius: "10px",
                     cursor: "pointer",
-                    transition: "all 0.3s"
+                    transition: "all 0.3s",
+                    transform: paymentMethod === "stripe" ? "scale(1.02)" : "scale(1)"
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
@@ -654,7 +715,8 @@ function reserverBronze() {
                     background: paymentMethod === "cash" ? "#f1f9f3" : "white",
                     borderRadius: "10px",
                     cursor: "pointer",
-                    transition: "all 0.3s"
+                    transition: "all 0.3s",
+                    transform: paymentMethod === "cash" ? "scale(1.02)" : "scale(1)"
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
@@ -693,8 +755,11 @@ function reserverBronze() {
                   fontSize: "1.2rem",
                   fontWeight: "bold",
                   cursor: loading ? "not-allowed" : "pointer",
-                  transition: "background 0.3s"
+                  transition: "all 0.3s",
+                  transform: loading ? "scale(1)" : "scale(1)",
                 }}
+                onMouseOver={(e) => !loading && (e.target.style.transform = "scale(1.02)")}
+                onMouseOut={(e) => !loading && (e.target.style.transform = "scale(1)")}
               >
                 {loading ? "Redirection..." : `💳 Payer ${calculerPrixTotal()}€ avec Stripe`}
               </button>
@@ -714,8 +779,10 @@ function reserverBronze() {
                   fontSize: "1.2rem",
                   fontWeight: "bold",
                   cursor: loading ? "not-allowed" : "pointer",
-                  transition: "background 0.3s"
+                  transition: "all 0.3s"
                 }}
+                onMouseOver={(e) => !loading && (e.target.style.transform = "scale(1.02)")}
+                onMouseOut={(e) => !loading && (e.target.style.transform = "scale(1)")}
               >
                 {loading ? "Réservation en cours..." : `✅ Confirmer la réservation (${calculerPrixTotal()}€ sur place)`}
               </button>
@@ -758,7 +825,16 @@ function reserverBronze() {
             color: "white",
             textDecoration: "none",
             borderRadius: "8px",
-            display: "inline-block"
+            display: "inline-block",
+            transition: "all 0.3s"
+          }}
+          onMouseOver={(e) => {
+            e.target.style.transform = "scale(1.05)";
+            e.target.style.background = "#5a6268";
+          }}
+          onMouseOut={(e) => {
+            e.target.style.transform = "scale(1)";
+            e.target.style.background = "#6c757d";
           }}
         >
           ← Retour

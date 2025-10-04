@@ -103,11 +103,7 @@ function App() {
                     <li>Traitement des plastiques/tableau de bord</li>
                     <li>Parfum</li>
                 </ul>
-                <div class="option">
-                    <h4>Shampouineuse en option :</h4>
-                    <p>10€ par siège / 40€ pour les 5 sièges
-                    <em>(avec les tapis et moquettes)</em></p>
-                </div>
+              
                 <Link to="/reserver-bronze" className="select-button">
                   Choisir cette formule
                 </Link>
@@ -118,18 +114,15 @@ function App() {
                 <div class="price">80€</div>
                 <ul class="features">
                     <li>Aspiration complète de l'habitacle</li>
-                    <li>Décontamination vapeur sièges/tapis/moquettes/coffre</li>
                     <li>Nettoyage des vitres et pare-brise</li>
                     <li>Traitement des plastiques/tableau de bord</li>
+                    <li>Parfum</li>
+                    <li>Décontamination vapeur sièges/tapis/moquettes/coffre</li>
                     <li>Nettoyage des seuils de portes</li>
                     <li>Dégraissage de la trappe à carburant</li>
-                    <li>Parfum</li>
+                   
                 </ul>
-                <div class="option">
-                    <h4>Shampouineuse en option :</h4>
-                    <p>5€ par siège / 20€ pour les 5 sièges
-                    <em>(avec les tapis et moquettes)</em></p>
-                </div>
+               
 
                 <Link to="/reserver-argent" className="select-button">
                   Choisir cette formule
@@ -141,13 +134,13 @@ function App() {
                 <div class="price">120€</div>
                 <ul class="features">
                     <li>Aspiration complète de l'habitacle</li>
-                    <li>Décontamination vapeur sièges/tapis/moquettes/coffre</li>
-                    <li>Shampouineuse sièges/tapis/moquettes/coffre <strong>(INCLUSE)</strong></li>
                     <li>Nettoyage des vitres et pare-brise</li>
                     <li>Traitement des plastiques/tableau de bord</li>
-                    <li>Nettoyage des seuils de portes</li>
-                    <li>Dégraissage de la trappe à carburant</li>
                     <li>Parfum</li>
+                    <li>Décontamination vapeur sièges/tapis/moquettes/coffre</li>
+                    <li>Nettoyage des seuils de portes</li>
+                    <li>Dégraissage de la trappe à carburant</li>                  
+                    <li>Shampouineuse sièges/tapis/moquettes/coffre</li>
                     <li>Décontamination de l'habitacle et traitement du système d'aération</li>
                 </ul>
                 <Link to="/reserver-or" className="select-button">
