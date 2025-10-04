@@ -528,43 +528,21 @@ html, body {
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 30px;
   margin-bottom: 50px;
+  padding: 0 20px;
 }
 
 .service {
-  background: rgb(207, 207, 207);
-  border-radius: 20px;
+  background: white;
+  border: 3px solid blue;
+  border-radius: 15px;
   padding: 30px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.service::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
-}
-
-.service.bronze::before {
-  background: linear-gradient(90deg, #cd7f32 0%, #daa520 100%);
-}
-
-.service.argent::before {
-  background: linear-gradient(90deg, #c0c0c0 0%, #e5e5e5 100%);
-}
-
-.service.or::before {
-  background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%);
 }
 
 .service:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 255, 0.2);
 }
 
 .service h3 {
@@ -573,18 +551,7 @@ html, body {
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 1px;
-}
-
-.service.bronze h3 {
-  color: #cd7f32;
-}
-
-.service.argent h3 {
-  color: #757575;
-}
-
-.service.or h3 {
-  color: #daa520;
+  color: blue;
 }
 
 /* Style pour les listes de features */
@@ -601,6 +568,7 @@ html, body {
   margin-bottom: 12px;
   font-size: 1rem;
   line-height: 1.5;
+  color: #333;
 }
 
 /* FORMULE BRONZE - Toutes les features avec coche verte */
@@ -630,7 +598,6 @@ html, body {
   font-size: 0.8rem;
 }
 
-
 /* FORMULE OR - Points gris pour les features de Bronze et Argent, coches vertes pour les nouvelles */
 .service.or .features li::before {
   content: "✓";
@@ -652,32 +619,26 @@ html, body {
   font-size: 0.8rem;
 }
 
-
 /* Style pour la section option */
 .service .option {
-  background: #f8f9fa;
+  background: #f0f8ff;
   padding: 15px;
   border-radius: 10px;
   margin: 20px 0;
+  border-left: 4px solid blue;
 }
 
 .service .option h4 {
   margin-top: 0;
   margin-bottom: 8px;
   font-size: 1.1rem;
-}
-
-.service.bronze .option h4 {
-  color: #cd7f32;
-}
-
-.service.argent .option h4 {
-  color: #757575;
+  color: blue;
 }
 
 .service .option p {
   margin: 0;
   font-size: 0.95rem;
+  color: #333;
 }
 
 .service .option em {
@@ -693,18 +654,7 @@ html, body {
   font-weight: bold;
   text-align: center;
   margin-bottom: 30px;
-}
-
-.service.bronze .price {
-  color: #cd7f32;
-}
-
-.service.argent .price {
-  color: #757575;
-}
-
-.service.or .price {
-  color: #daa520;
+  color: blue;
 }
 
 /* Bouton de sélection */
@@ -729,6 +679,25 @@ html, body {
   background-color: #0056b3;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 255, 0.3);
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .services {
+    grid-template-columns: 1fr;
+  }
+  
+  .Diff_services {
+    font-size: 2rem;
+  }
+  
+  .service h3 {
+    font-size: 1.5rem;
+  }
+  
+  .service .price {
+    font-size: 2rem;
+  }
 }
 .price {
   text-align: center;
