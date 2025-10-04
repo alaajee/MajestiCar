@@ -28,7 +28,11 @@ function App() {
     });
   }, []);
 
-  
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
   return (
     <div className="App">
       <div className="top-banner">
@@ -36,19 +40,28 @@ function App() {
       </div>
       <header className="App-header">
         <div className="menu-container">
-          <img src={image2} alt="Logo MajestiCar" className="menu-logo" />
+          <img src={image2} alt="Logo" className="menu-logo" />
           
-          <a href="/MajestiCar" className="menu-item">Home</a>
-          <a onClick={scrollToApropos} className="menu-item">A propos</a>
-          <a onClick={scrollToServices} className="menu-item">Services</a>
-          <a onClick={scrollToContact} className="menu-item">Contact</a>
-  
-       
-         
-          <button onClick={scrollToServices} className='Reserver-button'>
+          {/* Bouton hamburger */}
+          <div 
+            className={`hamburger-menu ${isMenuOpen ? 'active' : ''}`}
+            onClick={toggleMenu}
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          
+          {/* Items du menu */}
+          <div className={`menu-items-wrapper ${isMenuOpen ? 'open' : ''}`}>
+            <a href="/MajestiCar" className="menu-item">Home</a>
+            <a onClick={scrollToApropos} className="menu-item">A propos</a>
+            <a onClick={scrollToServices} className="menu-item">Services</a>
+            <a onClick={scrollToContact} className="menu-item">Contact</a>
+            <button onClick={scrollToServices} className='Reserver-button'>
               Réserver
-          </button>
-
+            </button>
+          </div>
         </div>
       </header>
       <div className="Photo">

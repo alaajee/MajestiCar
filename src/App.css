@@ -14,18 +14,16 @@ html, body {
 
 /* Bande bleue avec slogan animé */
 .top-banner {
-  background-color: blue; /* Bleu */
+  background-color: blue;
   width: 100%;
   padding: 10px 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
-  overflow: hidden;
-  position: fixed;   /* reste toujours visible */
+  position: fixed;
   top: 0;
   left: 0;
-  z-index: 1000;     /* au-dessus du reste */
+  z-index: 1000;
   overflow: hidden;
 }
 
@@ -67,21 +65,37 @@ html, body {
   padding: 0;
 }
 
+/* Menu container - GRANDS ÉCRANS */
 .menu-container {
   background-color: rgb(255, 255, 255);
   padding: 15px 30px;
   width: 100%;
   display: flex;
-  justify-content: center;
-  gap: 60px;
-  text-align: center;
+  justify-content: space-between;
+  align-items: center;
   margin: 0;
-  box-sizing: border-box; /* Inclut le padding dans la largeur */
-  position: fixed;   /* reste visible */
-  top: 40px;         /* juste sous la bannière */
+  box-sizing: border-box;
+  position: fixed;
+  top: 40px;
   left: 0;
   z-index: 999;
   border-bottom: 1px solid #ddd;
+}
+
+.menu-logo {
+  width: 50px;
+  height: auto;
+  margin-right: 0;
+}
+
+/* Wrapper pour les items du menu - GRANDS ÉCRANS */
+.menu-items-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  flex: 1;
+  justify-content: space-evenly;
+  padding: 0 50px;
 }
 
 .menu-item {
@@ -93,28 +107,14 @@ html, body {
   border-radius: 8px;
   transition: 0.3s ease;
   cursor: pointer;
-  margin-right: auto;
 }
 
-.menu-logo-container {
-  display: flex;
-  align-items: center;      /* centre verticalement le menu et le logo */
-  justify-content: space-between; /* menu à gauche, logo à droite */
-  padding: 0 20px;          /* un peu d’espace sur les côtés */
-}
-
-.menu-container {
-  display: flex;
-  gap: 20px;               /* espace entre les items du menu */
-}
-
-.menu-item {
-  cursor: pointer;
-  font-weight: bold;
+.menu-item:hover {
+  background-color: #f0f0f0;
 }
 
 .Reserver-button {
-  background-color: blue; /* Bleu vif */
+  background-color: blue;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -122,22 +122,42 @@ html, body {
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  margin-left: 200px;
   width: 150px;
 }
 
 .Reserver-button:hover {
-  background-color: #a9b6c4; /* Bleu plus foncé au survol */
+  background-color: #0056b3;
 }
 
-.Reserver-buttonn{
-  text-decoration: none;
+/* Bouton hamburger (caché par défaut) */
+.hamburger-menu {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  padding: 10px;
+  z-index: 1001;
 }
 
-.menu-logo {
-  width: 50px;             /* ajuste selon la taille souhaitée */
-  height: auto;
-  margin-right: auto;/* pousse le logo à droite */
+.hamburger-menu span {
+  width: 30px;
+  height: 3px;
+  background-color: #1b1b1b;
+  margin: 4px 0;
+  transition: 0.3s;
+  border-radius: 3px;
+}
+
+/* Animation du hamburger quand le menu est ouvert */
+.hamburger-menu.active span:nth-child(1) {
+  transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.hamburger-menu.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-menu.active span:nth-child(3) {
+  transform: rotate(45deg) translate(-5px, -6px);
 }
 
 .Photo {
@@ -145,6 +165,7 @@ html, body {
   padding: 0;
   display: block;
   position: relative;
+  margin-top: 90px;
 }
 
 .Photo img {
@@ -153,50 +174,44 @@ html, body {
   height: auto;
   margin: 0;
   padding: 0;
-  vertical-align: top; /* Évite l'espace en bas de l'image */
-  object-fit: cover; /* Assure un bon rendu de l'image */
+  vertical-align: top;
+  object-fit: cover;
 }
 
 /* Slogan sur l'image */
 .image-slogan {
   position: absolute;
-  top: 50%; /* Centre verticalement */
-  left: 50%; /* Centre horizontalement */
-  transform: translate(-50%, -50%); /* Centrage parfait horizontal ET vertical */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   max-width: 90%;
   font-size: 3rem;
   font-weight: 900;
   text-align: center;
   line-height: 1.2;
   letter-spacing: 2px;
-  
-  /* Magnifique dégradé bleu moderne */
-  background:rgb(255, 255, 255);
+  background: rgb(255, 255, 255);
   background-size: 300% 300%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  
-  /* Ombres pour contraste et profondeur */
   filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.9))
           drop-shadow(0px 0px 15px rgba(0, 198, 255, 0.4))
           drop-shadow(0px 0px 25px rgba(59, 130, 246, 0.3));
-  
-  /* Animation fluide du dégradé */
   animation: colorWave 5s ease-in-out infinite;
   z-index: 10;
 }
 
 .Mes_services {
   position: absolute;
-  bottom: 300px; /* Positionné en bas de l'image */
+  bottom: 300px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
 }
 
 .Button_services {
-  background-color: blue; /* Bleu clair */
+  background-color: blue;
   color: white;
   border: none;
   padding: 12px 25px;
@@ -206,14 +221,6 @@ html, body {
   text-decoration: none;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-
-
-.A_propos {
-  padding: 40px 20px;
-  text-align: center;
-  background-color: #f9f9f9;
 }
 
 .A_propos {
@@ -322,7 +329,6 @@ html, body {
       inset 0 1px 0 rgba(255,255,255,0.9);
 }
 
-/* Animation d'apparition */
 .A_propos {
   animation: fadeInUp 1s ease-out;
 }
@@ -341,42 +347,68 @@ html, body {
 /* Media query pour petits écrans (mobile) */
 @media screen and (max-width: 1500px) {
   .top-banner {
-    position: relative;
-    padding: 20px 10px;
+    padding: 15px 10px;
+  }
+  
+  .Photo {
+    margin-top: 130px;
+  }
+  
+  .menu-container {
+    position: fixed;
+    top: 40px;
+    padding: 15px 20px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
 
-  .menu-container {
+  .menu-logo {
+    width: 100px;
+    height: auto;
+    margin: 0;
+  }
+
+  /* Afficher le bouton hamburger */
+  .hamburger-menu {
+    display: flex;
+  }
+
+  /* Navigation mobile - VERTICAL */
+  .menu-items-wrapper {
+    position: fixed;
+    top: 90px;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative;
-    top: 0;
-    padding: 10px 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 998;
+    gap: 0;
+    padding: 0;
   }
 
-  /* Cacher les items par défaut sur tablette */
-  .menu-item,
-  .Reserver-button {
-    display: none;
+  .menu-items-wrapper.open {
+    max-height: 500px;
+    padding: 20px 0;
+  }
+
+  .menu-item {
     margin: 10px 0;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
+    width: 80%;
+    text-align: center;
+    padding: 15px;
+    display: block;
   }
 
-  /* Afficher les items au hover du logo */
-  .menu-container:hover .menu-item,
-  .menu-container:hover .Reserver-button {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* Garder le menu ouvert tant qu'on est dessus */
-  .menu-container:focus-within .menu-item,
-  .menu-container:focus-within .Reserver-button {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
+  .Reserver-button {
+    margin: 10px 0;
+    width: 80%;
   }
 
   .A_propos h2 {
