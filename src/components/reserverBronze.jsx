@@ -1,6 +1,6 @@
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import moment from "moment";
 import "moment/locale/fr";
@@ -13,6 +13,7 @@ moment.locale('fr');
 const localizer = momentLocalizer(moment);
 
 function reserverBronze() {
+  
   const navigate = useNavigate();
   const { 
     reservations, 
@@ -20,6 +21,10 @@ function reserverBronze() {
     getHorairesDisponibles,
     getReservationsParDate 
   } = useReservations();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
@@ -50,19 +55,38 @@ function reserverBronze() {
     return getHorairesDisponibles(date);
   };
 
-  const events = reservations.map(resa => ({
-    title: `${resa.heure} - ${resa.formule}`,
-    start: new Date(resa.date),
-    end: new Date(resa.date),
-    allDay: true
-  }));
+  // const events = reservations.map(resa => ({
+  //   title: `${resa.heure} - ${resa.formule}`,
+  //   start: new Date(resa.date),
+  //   end: new Date(resa.date),
+  //   allDay: true
+  // }));
 
+  // Fonction pour gérer le clic sur une date (mobile-friendly)
   const handleSelectSlot = (slotInfo) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     if (slotInfo.start >= today) {
       setSelectedDate(slotInfo.start);
+      setSelectedTime("");
+      setShowForm(false);
+      setPaymentMethod("");
+    } else {
+      alert("Vous ne pouvez pas réserver dans le passé");
+    }
+  };
+
+  // Nouvelle fonction pour le clic direct sur un événement de date
+  const handleDateClick = (date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const clickedDate = new Date(date);
+    clickedDate.setHours(0, 0, 0, 0);
+    
+    if (clickedDate >= today) {
+      setSelectedDate(date);
       setSelectedTime("");
       setShowForm(false);
       setPaymentMethod("");
@@ -136,19 +160,7 @@ function reserverBronze() {
           }).join(', ')
         : 'Aucune option supplémentaire';
 
-      await ajouterReservation(selectedDate, selectedTime, 'Bronze');
-
-      const templateParams = {
-        from_name: `${formData.prenom} ${formData.nom}`,
-        from_email: formData.email,
-        phone: formData.telephone,
-        date: moment(selectedDate).format('DD/MM/YYYY'),
-        time: selectedTime,
-        service: `Formule Bronze - 50€`,
-        options: optionsTexte,
-        prix_total: `${prixTotal}€`,
-        payment_status: '💵 Paiement sur place'
-      };
+      await ajouterReservation(selectedDate, selectedTime, 'Argent');
 
       const reservationData = {
         nom: formData.nom,
@@ -160,7 +172,7 @@ function reserverBronze() {
         heure: selectedTime,
         options: selectedOptions,
         optionsTexte: optionsTexte,
-        formule: 'Bronze',
+        formule: 'Argent',
         prixTotal: prixTotal,
         paymentMethod: 'cash'
       };
@@ -216,7 +228,7 @@ function reserverBronze() {
         date: moment(selectedDate).format("DD/MM/YYYY"),
         dateISO: selectedDate.toISOString(),
         heure: selectedTime,
-        formule: "Bronze",
+        formule: "Argent",
         options: selectedOptions,
         optionsTexte: optionsTexte,
         prixTotal: prixTotal,
@@ -233,7 +245,7 @@ function reserverBronze() {
         phone: formData.telephone,
         date: moment(selectedDate).format("DD/MM/YYYY"),
         time: selectedTime,
-        service: `Formule Bronze - 50€`,
+        service: `Formule Argent - 80€`,
         options: optionsTexte,
         prix_total: `${prixTotal}€`,
         payment_status: "💳 Paiement en ligne (Stripe)"
@@ -275,10 +287,10 @@ function reserverBronze() {
         }
         .rbc-day-bg {
           transition: background-color 0.2s ease;
+          cursor: pointer;
         }
         .rbc-day-bg:hover {
           background-color: #f0f7ff !important;
-          cursor: pointer;
         }
         .rbc-selected {
           background-color: #2c5aa0 !important;
@@ -292,12 +304,14 @@ function reserverBronze() {
         .rbc-date-cell {
           padding: 8px;
           transition: all 0.2s ease;
+          cursor: pointer;
         }
         .rbc-date-cell:hover {
           transform: scale(1.05);
         }
         .rbc-button-link {
           transition: color 0.2s ease;
+          cursor: pointer;
         }
         .rbc-button-link:hover {
           color: #2c5aa0;
@@ -315,6 +329,18 @@ function reserverBronze() {
           background-color: #2c5aa0;
           color: white;
           transform: translateY(-1px);
+        }
+        
+        /* Mobile: rendre les dates plus cliquables */
+        @media (max-width: 768px) {
+          .rbc-date-cell {
+            padding: 12px 8px;
+            min-height: 50px;
+          }
+          .rbc-button-link {
+            padding: 8px;
+            display: block;
+          }
         }
       `}</style>
 
@@ -410,16 +436,19 @@ function reserverBronze() {
         }}>
           <Calendar
             localizer={localizer}
-            events={events}
+            events={[]}
             startAccessor="start"
             endAccessor="end"
             style={{ height: "100%" }}
             onSelectSlot={handleSelectSlot}
+            onSelectEvent={(event) => handleDateClick(event.start)}
             onNavigate={handleNavigate}
+            onDrillDown={handleDateClick}
             date={currentDate}
             selectable
             views={['month']}
             defaultView="month"
+            longPressThreshold={10}
             messages={{
               next: "Suivant",
               previous: "Précédent",
@@ -466,35 +495,12 @@ function reserverBronze() {
         }}>
           <h2 style={{ color: "#2c5aa0" }}>Étape 3 : Choisissez une heure</h2>
           <p style={{ marginBottom: "1rem", color: "#555", fontSize: "1.1rem" }}>
-            📅 Date sélectionnée : <strong>{moment(selectedDate).format("dddd DD MMMM YYYY")}</strong>
+            Date sélectionnée : <strong>{moment(selectedDate).format("dddd DD MMMM YYYY")}</strong>
           </p>
 
-          {reservationsJour.length > 0 && (
-            <div style={{ 
-              marginBottom: "1rem", 
-              padding: "1rem", 
-              background: "#fff3cd", 
-              borderRadius: "8px",
-              border: "1px solid #ffc107"
-            }}>
-              <strong>⚠️ Créneaux déjà réservés ce jour :</strong>
-              <div style={{ marginTop: "0.5rem" }}>
-                {reservationsJour.map(resa => (
-                  <span key={resa.id} style={{ 
-                    display: "inline-block",
-                    margin: "0.25rem",
-                    padding: "0.5rem",
-                    background: "#dc3545",
-                    color: "white",
-                    borderRadius: "5px",
-                    fontSize: "0.9rem"
-                  }}>
-                    {resa.heure} ({resa.formule})
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+        
+             
+          
 
           {horairesDisponibles.length === 0 ? (
             <div style={{ 
@@ -505,7 +511,7 @@ function reserverBronze() {
               borderRadius: "8px",
               fontSize: "1.1rem"
             }}>
-              ❌ Tous les créneaux sont réservés pour cette date. Veuillez choisir un autre jour.
+              Tous les créneaux sont réservés pour cette date. Veuillez choisir un autre jour.
             </div>
           ) : (
             <div style={{ 
@@ -531,7 +537,7 @@ function reserverBronze() {
                     transform: selectedTime === heure ? "scale(1.05)" : "scale(1)"
                   }}
                 >
-                  {heure} ✓
+                  {heure}
                 </button>
               ))}
             </div>
@@ -539,7 +545,7 @@ function reserverBronze() {
         </div>
       )}
 
-      {/* ÉTAPE 4 : FORMULAIRE */}
+      {/* FORMULAIRE - identique au code précédent... */}
       {showForm && selectedTime && (
         <div style={{ 
           marginTop: "2rem", 
@@ -549,272 +555,272 @@ function reserverBronze() {
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
         }}>
           <h2 style={{ color: "#2c5aa0", marginBottom: "1.5rem" }}>
-            Étape 4 : Vos informations
-          </h2>
-
-          <div style={{ 
-            padding: "1rem", 
-            background: "#e3f2fd", 
-            borderRadius: "8px",
-            marginBottom: "2rem",
-            textAlign: "center"
-          }}>
-            <strong>Récapitulatif :</strong> {moment(selectedDate).format("DD/MM/YYYY")} à {selectedTime}
-            {selectedOptions.length > 0 && (
-              <div style={{ marginTop: "0.5rem", fontSize: "0.95rem" }}>
-                Options : {selectedOptions.map(optionId => {
-                  const option = optionsDisponibles.find(opt => opt.id === optionId);
-                  return option.nom;
-                }).join(', ')}
-              </div>
-            )}
-          </div>
-
-          <form>
-            <div style={{ 
-              display: "grid", 
-              gridTemplateColumns: "1fr 1fr", 
-              gap: "1rem",
-              marginBottom: "1rem"
-            }}>
-              <div>
-                <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                  Nom *
-                </label>
-                <input
-                  type="text"
-                  name="nom"
-                  value={formData.nom}
-                  onChange={handleInputChange}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "12px",
-                    border: "1px solid #ddd",
-                    borderRadius: "8px",
-                    fontSize: "1rem",
-                    transition: "border 0.3s"
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                  Prénom *
-                </label>
-                <input
-                  type="text"
-                  name="prenom"
-                  value={formData.prenom}
-                  onChange={handleInputChange}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "12px",
-                    border: "1px solid #ddd",
-                    borderRadius: "8px",
-                    fontSize: "1rem",
-                    transition: "border 0.3s"
-                  }}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                Email *
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  border: "1px solid #ddd",
-                  borderRadius: "8px",
-                  fontSize: "1rem",
-                  transition: "border 0.3s"
-                }}
-              />
-            </div>
-
-            <div style={{ marginBottom: "2rem" }}>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                Téléphone *
-              </label>
-              <input
-                type="tel"
-                name="telephone"
-                value={formData.telephone}
-                onChange={handleInputChange}
-                placeholder="06 12 34 56 78"
-                required
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  border: "1px solid #ddd",
-                  borderRadius: "8px",
-                  fontSize: "1rem",
-                  transition: "border 0.3s"
-                }}
-              />
-            </div>
-
-            {/* CHOIX DU MODE DE PAIEMENT */}
-            <div style={{ 
-              marginBottom: "2rem",
-              padding: "1.5rem",
-              background: "#f8f9fa",
-              borderRadius: "12px",
-              border: "2px solid #dee2e6"
-            }}>
-              <h3 style={{ color: "#2c5aa0", marginTop: 0, marginBottom: "1.5rem" }}>
-                💳 Mode de paiement
-              </h3>
-              
-              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                <div
-                  onClick={() => setPaymentMethod("stripe")}
-                  style={{
-                    padding: "1.5rem",
-                    border: paymentMethod === "stripe" ? "3px solid #635bff" : "2px solid #ddd",
-                    background: paymentMethod === "stripe" ? "#f7f6ff" : "white",
-                    borderRadius: "10px",
-                    cursor: "pointer",
-                    transition: "all 0.3s",
-                    transform: paymentMethod === "stripe" ? "scale(1.02)" : "scale(1)"
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked={paymentMethod === "stripe"}
-                      onChange={() => setPaymentMethod("stripe")}
-                      style={{ width: "20px", height: "20px", cursor: "pointer" }}
-                    />
-                    <div>
-                      <div style={{ fontWeight: "bold", fontSize: "1.1rem", marginBottom: "0.5rem" }}>
-                        💳 Paiement en ligne par carte
-                      </div>
-                      <div style={{ color: "#666", fontSize: "0.95rem" }}>
-                        Paiement sécurisé via Stripe • Confirmation immédiate
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  onClick={() => setPaymentMethod("cash")}
-                  style={{
-                    padding: "1.5rem",
-                    border: paymentMethod === "cash" ? "3px solid #28a745" : "2px solid #ddd",
-                    background: paymentMethod === "cash" ? "#f1f9f3" : "white",
-                    borderRadius: "10px",
-                    cursor: "pointer",
-                    transition: "all 0.3s",
-                    transform: paymentMethod === "cash" ? "scale(1.02)" : "scale(1)"
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked={paymentMethod === "cash"}
-                      onChange={() => setPaymentMethod("cash")}
-                      style={{ width: "20px", height: "20px", cursor: "pointer" }}
-                    />
-                    <div>
-                      <div style={{ fontWeight: "bold", fontSize: "1.1rem", marginBottom: "0.5rem" }}>
-                        💵 Paiement sur place
-                      </div>
-                      <div style={{ color: "#666", fontSize: "0.95rem" }}>
-                        Espèces ou carte le jour du rendez-vous • Total : {calculerPrixTotal()}€
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* BOUTONS DE PAIEMENT */}
-            {paymentMethod === "stripe" && (
-              <button
-                onClick={handleStripePayment}
-                disabled={loading}
-                style={{
-                  width: "100%",
-                  padding: "1.5rem",
-                  background: loading ? "#6c757d" : "#635bff",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "12px",
-                  fontSize: "1.2rem",
-                  fontWeight: "bold",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  transition: "all 0.3s",
-                  transform: loading ? "scale(1)" : "scale(1)",
-                }}
-                onMouseOver={(e) => !loading && (e.target.style.transform = "scale(1.02)")}
-                onMouseOut={(e) => !loading && (e.target.style.transform = "scale(1)")}
-              >
-                {loading ? "Redirection..." : `💳 Payer ${calculerPrixTotal()}€ avec Stripe`}
-              </button>
-            )}
-
-            {paymentMethod === "cash" && (
-              <button
-                onClick={handleCashPayment}
-                disabled={loading}
-                style={{
-                  width: "100%",
-                  padding: "1.5rem",
-                  background: loading ? "#6c757d" : "#28a745",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "12px",
-                  fontSize: "1.2rem",
-                  fontWeight: "bold",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  transition: "all 0.3s"
-                }}
-                onMouseOver={(e) => !loading && (e.target.style.transform = "scale(1.02)")}
-                onMouseOut={(e) => !loading && (e.target.style.transform = "scale(1)")}
-              >
-                {loading ? "Réservation en cours..." : `✅ Confirmer la réservation (${calculerPrixTotal()}€ sur place)`}
-              </button>
-            )}
-
-            {!paymentMethod && (
-              <div style={{
-                width: "100%",
-                padding: "1.5rem",
-                background: "#e9ecef",
-                color: "#6c757d",
-                border: "2px dashed #adb5bd",
-                borderRadius: "12px",
-                fontSize: "1.1rem",
-                fontWeight: "bold",
-                textAlign: "center"
-              }}>
-                ⬆️ Veuillez choisir un mode de paiement
-              </div>
-            )}
-          </form>
-
-          <p style={{ 
-            marginTop: "1rem", 
-            textAlign: "center", 
-            color: "#666",
-            fontSize: "0.9rem"
-          }}>
-            🔒 Vos données sont sécurisées et ne seront pas partagées
-          </p>
-        </div>
-      )}
+                     Étape 4 : Vos informations
+                   </h2>
+         
+                   <div style={{ 
+                     padding: "1rem", 
+                     background: "#e3f2fd", 
+                     borderRadius: "8px",
+                     marginBottom: "2rem",
+                     textAlign: "center"
+                   }}>
+                     <strong>Récapitulatif :</strong> {moment(selectedDate).format("DD/MM/YYYY")} à {selectedTime}
+                     {selectedOptions.length > 0 && (
+                       <div style={{ marginTop: "0.5rem", fontSize: "0.95rem" }}>
+                         Options : {selectedOptions.map(optionId => {
+                           const option = optionsDisponibles.find(opt => opt.id === optionId);
+                           return option.nom;
+                         }).join(', ')}
+                       </div>
+                     )}
+                   </div>
+         
+                   <form>
+                     <div style={{ 
+                       display: "grid", 
+                       gridTemplateColumns: "1fr 1fr", 
+                       gap: "1rem",
+                       marginBottom: "1rem"
+                     }}>
+                       <div>
+                         <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                           Nom *
+                         </label>
+                         <input
+                           type="text"
+                           name="nom"
+                           value={formData.nom}
+                           onChange={handleInputChange}
+                           required
+                           style={{
+                             width: "100%",
+                             padding: "12px",
+                             border: "1px solid #ddd",
+                             borderRadius: "8px",
+                             fontSize: "1rem",
+                             transition: "border 0.3s"
+                           }}
+                         />
+                       </div>
+         
+                       <div>
+                         <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                           Prénom *
+                         </label>
+                         <input
+                           type="text"
+                           name="prenom"
+                           value={formData.prenom}
+                           onChange={handleInputChange}
+                           required
+                           style={{
+                             width: "100%",
+                             padding: "12px",
+                             border: "1px solid #ddd",
+                             borderRadius: "8px",
+                             fontSize: "1rem",
+                             transition: "border 0.3s"
+                           }}
+                         />
+                       </div>
+                     </div>
+         
+                     <div style={{ marginBottom: "1rem" }}>
+                       <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                         Email *
+                       </label>
+                       <input
+                         type="email"
+                         name="email"
+                         value={formData.email}
+                         onChange={handleInputChange}
+                         required
+                         style={{
+                           width: "100%",
+                           padding: "12px",
+                           border: "1px solid #ddd",
+                           borderRadius: "8px",
+                           fontSize: "1rem",
+                           transition: "border 0.3s"
+                         }}
+                       />
+                     </div>
+         
+                     <div style={{ marginBottom: "2rem" }}>
+                       <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                         Téléphone *
+                       </label>
+                       <input
+                         type="tel"
+                         name="telephone"
+                         value={formData.telephone}
+                         onChange={handleInputChange}
+                         placeholder="06 12 34 56 78"
+                         required
+                         style={{
+                           width: "100%",
+                           padding: "12px",
+                           border: "1px solid #ddd",
+                           borderRadius: "8px",
+                           fontSize: "1rem",
+                           transition: "border 0.3s"
+                         }}
+                       />
+                     </div>
+         
+                     {/* CHOIX DU MODE DE PAIEMENT */}
+                     <div style={{ 
+                       marginBottom: "2rem",
+                       padding: "1.5rem",
+                       background: "#f8f9fa",
+                       borderRadius: "12px",
+                       border: "2px solid #dee2e6"
+                     }}>
+                       <h3 style={{ color: "#2c5aa0", marginTop: 0, marginBottom: "1.5rem" }}>
+                         💳 Mode de paiement
+                       </h3>
+                       
+                       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                         <div
+                           onClick={() => setPaymentMethod("stripe")}
+                           style={{
+                             padding: "1.5rem",
+                             border: paymentMethod === "stripe" ? "3px solid #635bff" : "2px solid #ddd",
+                             background: paymentMethod === "stripe" ? "#f7f6ff" : "white",
+                             borderRadius: "10px",
+                             cursor: "pointer",
+                             transition: "all 0.3s",
+                             transform: paymentMethod === "stripe" ? "scale(1.02)" : "scale(1)"
+                           }}
+                         >
+                           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                             <input
+                               type="radio"
+                               name="payment"
+                               checked={paymentMethod === "stripe"}
+                               onChange={() => setPaymentMethod("stripe")}
+                               style={{ width: "20px", height: "20px", cursor: "pointer" }}
+                             />
+                             <div>
+                               <div style={{ fontWeight: "bold", fontSize: "1.1rem", marginBottom: "0.5rem" }}>
+                                 💳 Paiement en ligne par carte
+                               </div>
+                               <div style={{ color: "#666", fontSize: "0.95rem" }}>
+                                 Paiement sécurisé via Stripe • Confirmation immédiate
+                               </div>
+                             </div>
+                           </div>
+                         </div>
+         
+                         <div
+                           onClick={() => setPaymentMethod("cash")}
+                           style={{
+                             padding: "1.5rem",
+                             border: paymentMethod === "cash" ? "3px solid #28a745" : "2px solid #ddd",
+                             background: paymentMethod === "cash" ? "#f1f9f3" : "white",
+                             borderRadius: "10px",
+                             cursor: "pointer",
+                             transition: "all 0.3s",
+                             transform: paymentMethod === "cash" ? "scale(1.02)" : "scale(1)"
+                           }}
+                         >
+                           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                             <input
+                               type="radio"
+                               name="payment"
+                               checked={paymentMethod === "cash"}
+                               onChange={() => setPaymentMethod("cash")}
+                               style={{ width: "20px", height: "20px", cursor: "pointer" }}
+                             />
+                             <div>
+                               <div style={{ fontWeight: "bold", fontSize: "1.1rem", marginBottom: "0.5rem" }}>
+                                 💵 Paiement sur place
+                               </div>
+                               <div style={{ color: "#666", fontSize: "0.95rem" }}>
+                                 Espèces ou carte le jour du rendez-vous • Total : {calculerPrixTotal()}€
+                               </div>
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+         
+                     {/* BOUTONS DE PAIEMENT */}
+                     {paymentMethod === "stripe" && (
+                       <button
+                         onClick={handleStripePayment}
+                         disabled={loading}
+                         style={{
+                           width: "100%",
+                           padding: "1.5rem",
+                           background: loading ? "#6c757d" : "#635bff",
+                           color: "white",
+                           border: "none",
+                           borderRadius: "12px",
+                           fontSize: "1.2rem",
+                           fontWeight: "bold",
+                           cursor: loading ? "not-allowed" : "pointer",
+                           transition: "all 0.3s",
+                           transform: loading ? "scale(1)" : "scale(1)",
+                         }}
+                         onMouseOver={(e) => !loading && (e.target.style.transform = "scale(1.02)")}
+                         onMouseOut={(e) => !loading && (e.target.style.transform = "scale(1)")}
+                       >
+                         {loading ? "Redirection..." : `💳 Payer ${calculerPrixTotal()}€ avec Stripe`}
+                       </button>
+                     )}
+         
+                     {paymentMethod === "cash" && (
+                       <button
+                         onClick={handleCashPayment}
+                         disabled={loading}
+                         style={{
+                           width: "100%",
+                           padding: "1.5rem",
+                           background: loading ? "#6c757d" : "#28a745",
+                           color: "white",
+                           border: "none",
+                           borderRadius: "12px",
+                           fontSize: "1.2rem",
+                           fontWeight: "bold",
+                           cursor: loading ? "not-allowed" : "pointer",
+                           transition: "all 0.3s"
+                         }}
+                         onMouseOver={(e) => !loading && (e.target.style.transform = "scale(1.02)")}
+                         onMouseOut={(e) => !loading && (e.target.style.transform = "scale(1)")}
+                       >
+                         {loading ? "Réservation en cours..." : `✅ Confirmer la réservation (${calculerPrixTotal()}€ sur place)`}
+                       </button>
+                     )}
+         
+                     {!paymentMethod && (
+                       <div style={{
+                         width: "100%",
+                         padding: "1.5rem",
+                         background: "#e9ecef",
+                         color: "#6c757d",
+                         border: "2px dashed #adb5bd",
+                         borderRadius: "12px",
+                         fontSize: "1.1rem",
+                         fontWeight: "bold",
+                         textAlign: "center"
+                       }}>
+                         ⬆️ Veuillez choisir un mode de paiement
+                       </div>
+                     )}
+                   </form>
+         
+                   <p style={{ 
+                     marginTop: "1rem", 
+                     textAlign: "center", 
+                     color: "#666",
+                     fontSize: "0.9rem"
+                   }}>
+                     🔒 Vos données sont sécurisées et ne seront pas partagées
+                   </p>
+                 </div>
+               )}
 
       <div style={{ marginTop: "2rem", textAlign: "center" }}>
         <Link 
@@ -825,19 +831,10 @@ function reserverBronze() {
             color: "white",
             textDecoration: "none",
             borderRadius: "8px",
-            display: "inline-block",
-            transition: "all 0.3s"
-          }}
-          onMouseOver={(e) => {
-            e.target.style.transform = "scale(1.05)";
-            e.target.style.background = "#5a6268";
-          }}
-          onMouseOut={(e) => {
-            e.target.style.transform = "scale(1)";
-            e.target.style.background = "#6c757d";
+            display: "inline-block"
           }}
         >
-          ← Retour
+          Retour
         </Link>
       </div>
     </div>

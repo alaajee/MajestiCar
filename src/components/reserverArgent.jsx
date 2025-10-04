@@ -1,6 +1,6 @@
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import moment from "moment";
 import "moment/locale/fr";
@@ -13,6 +13,7 @@ moment.locale('fr');
 const localizer = momentLocalizer(moment);
 
 function reserverArgent() {
+  
   const navigate = useNavigate();
   const { 
     reservations, 
@@ -20,6 +21,10 @@ function reserverArgent() {
     getHorairesDisponibles,
     getReservationsParDate 
   } = useReservations();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
@@ -50,12 +55,12 @@ function reserverArgent() {
     return getHorairesDisponibles(date);
   };
 
-  const events = reservations.map(resa => ({
-    title: `${resa.heure} - ${resa.formule}`,
-    start: new Date(resa.date),
-    end: new Date(resa.date),
-    allDay: true
-  }));
+  // const events = reservations.map(resa => ({
+  //   title: `${resa.heure} - ${resa.formule}`,
+  //   start: new Date(resa.date),
+  //   end: new Date(resa.date),
+  //   allDay: true
+  // }));
 
   // Fonction pour gérer le clic sur une date (mobile-friendly)
   const handleSelectSlot = (slotInfo) => {
@@ -431,7 +436,7 @@ function reserverArgent() {
         }}>
           <Calendar
             localizer={localizer}
-            events={events}
+            events={[]}
             startAccessor="start"
             endAccessor="end"
             style={{ height: "100%" }}
@@ -493,32 +498,9 @@ function reserverArgent() {
             Date sélectionnée : <strong>{moment(selectedDate).format("dddd DD MMMM YYYY")}</strong>
           </p>
 
-          {reservationsJour.length > 0 && (
-            <div style={{ 
-              marginBottom: "1rem", 
-              padding: "1rem", 
-              background: "#fff3cd", 
-              borderRadius: "8px",
-              border: "1px solid #ffc107"
-            }}>
-              <strong>Créneaux déjà réservés ce jour :</strong>
-              <div style={{ marginTop: "0.5rem" }}>
-                {reservationsJour.map(resa => (
-                  <span key={resa.id} style={{ 
-                    display: "inline-block",
-                    margin: "0.25rem",
-                    padding: "0.5rem",
-                    background: "#dc3545",
-                    color: "white",
-                    borderRadius: "5px",
-                    fontSize: "0.9rem"
-                  }}>
-                    {resa.heure} ({resa.formule})
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+        
+             
+          
 
           {horairesDisponibles.length === 0 ? (
             <div style={{ 
