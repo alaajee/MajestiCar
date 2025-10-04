@@ -572,9 +572,273 @@ function reserverArgent() {
           borderRadius: "12px",
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
         }}>
-          {/* ... reste du formulaire identique ... */}
-        </div>
-      )}
+          <h2 style={{ color: "#2c5aa0", marginBottom: "1.5rem" }}>
+                     Étape 4 : Vos informations
+                   </h2>
+         
+                   <div style={{ 
+                     padding: "1rem", 
+                     background: "#e3f2fd", 
+                     borderRadius: "8px",
+                     marginBottom: "2rem",
+                     textAlign: "center"
+                   }}>
+                     <strong>Récapitulatif :</strong> {moment(selectedDate).format("DD/MM/YYYY")} à {selectedTime}
+                     {selectedOptions.length > 0 && (
+                       <div style={{ marginTop: "0.5rem", fontSize: "0.95rem" }}>
+                         Options : {selectedOptions.map(optionId => {
+                           const option = optionsDisponibles.find(opt => opt.id === optionId);
+                           return option.nom;
+                         }).join(', ')}
+                       </div>
+                     )}
+                   </div>
+         
+                   <form>
+                     <div style={{ 
+                       display: "grid", 
+                       gridTemplateColumns: "1fr 1fr", 
+                       gap: "1rem",
+                       marginBottom: "1rem"
+                     }}>
+                       <div>
+                         <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                           Nom *
+                         </label>
+                         <input
+                           type="text"
+                           name="nom"
+                           value={formData.nom}
+                           onChange={handleInputChange}
+                           required
+                           style={{
+                             width: "100%",
+                             padding: "12px",
+                             border: "1px solid #ddd",
+                             borderRadius: "8px",
+                             fontSize: "1rem",
+                             transition: "border 0.3s"
+                           }}
+                         />
+                       </div>
+         
+                       <div>
+                         <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                           Prénom *
+                         </label>
+                         <input
+                           type="text"
+                           name="prenom"
+                           value={formData.prenom}
+                           onChange={handleInputChange}
+                           required
+                           style={{
+                             width: "100%",
+                             padding: "12px",
+                             border: "1px solid #ddd",
+                             borderRadius: "8px",
+                             fontSize: "1rem",
+                             transition: "border 0.3s"
+                           }}
+                         />
+                       </div>
+                     </div>
+         
+                     <div style={{ marginBottom: "1rem" }}>
+                       <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                         Email *
+                       </label>
+                       <input
+                         type="email"
+                         name="email"
+                         value={formData.email}
+                         onChange={handleInputChange}
+                         required
+                         style={{
+                           width: "100%",
+                           padding: "12px",
+                           border: "1px solid #ddd",
+                           borderRadius: "8px",
+                           fontSize: "1rem",
+                           transition: "border 0.3s"
+                         }}
+                       />
+                     </div>
+         
+                     <div style={{ marginBottom: "2rem" }}>
+                       <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+                         Téléphone *
+                       </label>
+                       <input
+                         type="tel"
+                         name="telephone"
+                         value={formData.telephone}
+                         onChange={handleInputChange}
+                         placeholder="06 12 34 56 78"
+                         required
+                         style={{
+                           width: "100%",
+                           padding: "12px",
+                           border: "1px solid #ddd",
+                           borderRadius: "8px",
+                           fontSize: "1rem",
+                           transition: "border 0.3s"
+                         }}
+                       />
+                     </div>
+         
+                     {/* CHOIX DU MODE DE PAIEMENT */}
+                     <div style={{ 
+                       marginBottom: "2rem",
+                       padding: "1.5rem",
+                       background: "#f8f9fa",
+                       borderRadius: "12px",
+                       border: "2px solid #dee2e6"
+                     }}>
+                       <h3 style={{ color: "#2c5aa0", marginTop: 0, marginBottom: "1.5rem" }}>
+                         💳 Mode de paiement
+                       </h3>
+                       
+                       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                         <div
+                           onClick={() => setPaymentMethod("stripe")}
+                           style={{
+                             padding: "1.5rem",
+                             border: paymentMethod === "stripe" ? "3px solid #635bff" : "2px solid #ddd",
+                             background: paymentMethod === "stripe" ? "#f7f6ff" : "white",
+                             borderRadius: "10px",
+                             cursor: "pointer",
+                             transition: "all 0.3s",
+                             transform: paymentMethod === "stripe" ? "scale(1.02)" : "scale(1)"
+                           }}
+                         >
+                           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                             <input
+                               type="radio"
+                               name="payment"
+                               checked={paymentMethod === "stripe"}
+                               onChange={() => setPaymentMethod("stripe")}
+                               style={{ width: "20px", height: "20px", cursor: "pointer" }}
+                             />
+                             <div>
+                               <div style={{ fontWeight: "bold", fontSize: "1.1rem", marginBottom: "0.5rem" }}>
+                                 💳 Paiement en ligne par carte
+                               </div>
+                               <div style={{ color: "#666", fontSize: "0.95rem" }}>
+                                 Paiement sécurisé via Stripe • Confirmation immédiate
+                               </div>
+                             </div>
+                           </div>
+                         </div>
+         
+                         <div
+                           onClick={() => setPaymentMethod("cash")}
+                           style={{
+                             padding: "1.5rem",
+                             border: paymentMethod === "cash" ? "3px solid #28a745" : "2px solid #ddd",
+                             background: paymentMethod === "cash" ? "#f1f9f3" : "white",
+                             borderRadius: "10px",
+                             cursor: "pointer",
+                             transition: "all 0.3s",
+                             transform: paymentMethod === "cash" ? "scale(1.02)" : "scale(1)"
+                           }}
+                         >
+                           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                             <input
+                               type="radio"
+                               name="payment"
+                               checked={paymentMethod === "cash"}
+                               onChange={() => setPaymentMethod("cash")}
+                               style={{ width: "20px", height: "20px", cursor: "pointer" }}
+                             />
+                             <div>
+                               <div style={{ fontWeight: "bold", fontSize: "1.1rem", marginBottom: "0.5rem" }}>
+                                 💵 Paiement sur place
+                               </div>
+                               <div style={{ color: "#666", fontSize: "0.95rem" }}>
+                                 Espèces ou carte le jour du rendez-vous • Total : {calculerPrixTotal()}€
+                               </div>
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+         
+                     {/* BOUTONS DE PAIEMENT */}
+                     {paymentMethod === "stripe" && (
+                       <button
+                         onClick={handleStripePayment}
+                         disabled={loading}
+                         style={{
+                           width: "100%",
+                           padding: "1.5rem",
+                           background: loading ? "#6c757d" : "#635bff",
+                           color: "white",
+                           border: "none",
+                           borderRadius: "12px",
+                           fontSize: "1.2rem",
+                           fontWeight: "bold",
+                           cursor: loading ? "not-allowed" : "pointer",
+                           transition: "all 0.3s",
+                           transform: loading ? "scale(1)" : "scale(1)",
+                         }}
+                         onMouseOver={(e) => !loading && (e.target.style.transform = "scale(1.02)")}
+                         onMouseOut={(e) => !loading && (e.target.style.transform = "scale(1)")}
+                       >
+                         {loading ? "Redirection..." : `💳 Payer ${calculerPrixTotal()}€ avec Stripe`}
+                       </button>
+                     )}
+         
+                     {paymentMethod === "cash" && (
+                       <button
+                         onClick={handleCashPayment}
+                         disabled={loading}
+                         style={{
+                           width: "100%",
+                           padding: "1.5rem",
+                           background: loading ? "#6c757d" : "#28a745",
+                           color: "white",
+                           border: "none",
+                           borderRadius: "12px",
+                           fontSize: "1.2rem",
+                           fontWeight: "bold",
+                           cursor: loading ? "not-allowed" : "pointer",
+                           transition: "all 0.3s"
+                         }}
+                         onMouseOver={(e) => !loading && (e.target.style.transform = "scale(1.02)")}
+                         onMouseOut={(e) => !loading && (e.target.style.transform = "scale(1)")}
+                       >
+                         {loading ? "Réservation en cours..." : `✅ Confirmer la réservation (${calculerPrixTotal()}€ sur place)`}
+                       </button>
+                     )}
+         
+                     {!paymentMethod && (
+                       <div style={{
+                         width: "100%",
+                         padding: "1.5rem",
+                         background: "#e9ecef",
+                         color: "#6c757d",
+                         border: "2px dashed #adb5bd",
+                         borderRadius: "12px",
+                         fontSize: "1.1rem",
+                         fontWeight: "bold",
+                         textAlign: "center"
+                       }}>
+                         ⬆️ Veuillez choisir un mode de paiement
+                       </div>
+                     )}
+                   </form>
+         
+                   <p style={{ 
+                     marginTop: "1rem", 
+                     textAlign: "center", 
+                     color: "#666",
+                     fontSize: "0.9rem"
+                   }}>
+                     🔒 Vos données sont sécurisées et ne seront pas partagées
+                   </p>
+                 </div>
+               )}
 
       <div style={{ marginTop: "2rem", textAlign: "center" }}>
         <Link 
