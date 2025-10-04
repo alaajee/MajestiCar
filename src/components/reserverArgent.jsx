@@ -751,7 +751,7 @@ function reserverArgent() {
 
       <div style={{ marginTop: "2rem", textAlign: "center" }}>
         <Link 
-          to="/MajestiCar"  
+          to="/"  
           style={{
             padding: "1rem 2rem",
             background: "#6c757d",

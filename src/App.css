@@ -339,7 +339,7 @@ html, body {
 }
 
 /* Media query pour petits écrans (mobile) */
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 1500px) {
   .top-banner {
     position: relative;
     padding: 20px 10px;
@@ -394,15 +394,19 @@ html, body {
   }
   
   .Mes_services {
-    bottom: 20px;
+    bottom: 15px;
   }
 
   .Button_services {
     padding: 10px 20px;
     font-size: 1rem;  
   }
-  
-  
+}
+
+@media screen and (min-width: 600px) and (max-width: 1300px) {
+  .Mes_services {
+    bottom: 80px;
+  }
 }
 
 
@@ -575,165 +579,85 @@ html, body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
-.features {
-  list-style: none;
-  margin-bottom: 20px;
-}
-
-.features li {
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
-  position: relative;
-  padding-left: 30px;
-}
-
-.features li::before {
-  content: "✓";
-  position: absolute;
-  left: 0;
-  color: #4caf50;
-  font-weight: bold;
-  font-size: 18px;
-}
-
-.features li:last-child {
-  border-bottom: none;
-}
-
-.option {
-  background: rgba(103, 126, 234, 0.1);
-  padding: 15px;
-  border-radius: 10px;
-  margin-top: 20px;
-  border-left: 4px solid #667eea;
-}
-
-.option h4 {
-  color: #667eea;
-  margin-bottom: 8px;
-  font-size: 1.1rem;
-}
-
-.option p {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.contact {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 40px;
+.footer-section {
+  background-color: #003366; /* bleu foncé */
+  color: white;
+  padding: 60px 20px 30px;
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
-.contact h2 {
-  color: #333;
-  margin-bottom: 25px;
-  font-size: 2rem;
+.footer-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  margin-bottom: 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 30px;
 }
 
-.contact-info {
+.footer-contact,
+.footer-social,
+.footer-info {
+  max-width: 300px;
+  flex: 1;
+}
+
+.footer-contact h2,
+.footer-social h2,
+.footer-info h2 {
+  margin-bottom: 15px;
+  color: #ffffff;
+  border-bottom: 2px solid #00aaff;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+.footer-email,
+.footer-phone {
+  color: #00aaff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.footer-email:hover,
+.footer-phone:hover {
+  text-decoration: underline;
+}
+
+.footer-divider {
+  width: 2px;
+  height: 120px;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.social-links {
   display: flex;
   justify-content: center;
-  gap: 40px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
+  gap: 20px;
+  margin-top: 10px;
 }
 
-.contact-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #666;
-  font-size: 1.1rem;
-}
-
-.contact-item .icon {
-  width: 24px;
-  height: 24px;
-  display: inline-block;
-}
-
-.disclaimer {
-  background: rgba(255, 193, 7, 0.1);
-  border: 1px solid rgba(255, 193, 7, 0.3);
-  border-radius: 10px;
-  padding: 15px;
-  margin-top: 30px;
-  text-align: center;
-  font-style: italic;
-  color: #856404;
-}
-
-@media (max-width: 768px) {
-  h1 {
-      font-size: 2rem;
-  }
-  
-  .services {
-      grid-template-columns: 1fr;
-  }
-  
-  .contact-info {
-      flex-direction: column;
-      gap: 20px;
-  }
-}
-
-.contact-section {
-  padding: 40px 20px;
-  background-color: white;
-  text-align: center;
-}
-
-.contact-form {
-  max-width: 600px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.contact-form input,
-.contact-form textarea {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 1rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.contact-form button {
-  background-color: #85caf6;
-  color: white;
-  border: none;
-  padding: 12px;
-  border-radius: 5px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.contact-form button:hover {
-  background-color: #67b0e8;
-}
-
-.ButtonEnvoyer {
-  color: white;
+.social-link {
+  color: #ffffff;
   text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
 }
 
-.App-footer {
-  background-color: #2c3e50;
-  color: white;
-  text-align: center;
-  padding: 15px 20px;
-  position: relative;
-  bottom: 0;
-  width: 100%;
-  font-size: 14px;
+.social-link:hover {
+  color: #00aaff;
+}
+
+.footer-info p {
+  color: #cccccc;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.footer-bottom {
+  margin-top: 20px;
+  font-size: 0.9em;
+  color: #ccc;
 }

@@ -9,10 +9,18 @@ import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
-  const servicesRef = useRef(null);
+  const servicesRef = useRef(null); 
+  const AproposRef = useRef(null);
+  const contactRef = useRef(null);
   const scrollToServices = () => {
     servicesRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+  const scrollToApropos = () => {
+    AproposRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }
+  const scrollToContact = () => {
+    contactRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }
   useEffect(() => {
     const cards = document.querySelectorAll(".mw-card");
     cards.forEach((card, i) => {
@@ -31,10 +39,10 @@ function App() {
           <img src={image2} alt="Logo MugiWash" className="menu-logo" />
           
           <a href="/MugiWash" className="menu-item">Home</a>
-          <a href="#" className="menu-item">A propos</a>
+          <a onClick={scrollToApropos} className="menu-item">A propos</a>
           <a onClick={scrollToServices} className="menu-item">Services</a>
-          <a href="#" className="menu-item">Contact</a>
-          <a href="#" className="menu-item">MugiWash</a>
+          <a onClick={scrollToContact} className="menu-item">Contact</a>
+  
        
          
           <button onClick={scrollToServices} className='Reserver-button'>
@@ -46,7 +54,7 @@ function App() {
       <div className="Photo">
         <img src={image1} alt="A beautiful scenery" />
         <div className="image-slogan">
-          Votre voiture, notre soin, partout avec MugiWash.
+          Votre voiture, notre soin, partout avec Majesti'Car.
         </div>
 
         <div className="Mes_services">
@@ -58,7 +66,7 @@ function App() {
       </div>
       
       
-      <div className="A_propos">
+      <div className="A_propos" ref={AproposRef}>
       <h2>À propos de Majesti’Car</h2>
       <p>
         Bienvenue chez Majesti’Car, votre partenaire du nettoyage automobile premium 💎.
@@ -147,25 +155,49 @@ function App() {
                 </Link>
             </div>
         </div>
+        <footer className="footer-section">
+        <div className="footer-container">
+          {/* Section Contact */}
+          <div className="footer-contact">
+            <h2>Contactez-nous</h2>
+            <p>
+              <strong>Téléphone :</strong> <a href="tel:+212612345678" className="footer-phone">+212 6 12 34 56 78</a>
+            </p>
+            <p>
+              <strong>Email :</strong> <a href="mailto:alaejennine33@gmail.com" className="footer-email">alaejennine33@gmail.com</a>
+            </p>
+          </div>
 
-        <div className="contact-section">
-          <h2>Contactez-nous</h2>
-          <form className="contact-form">
-            <input type="text" placeholder="Votre nom" required />
-            <input type="email" placeholder="Votre email" required />
-            <textarea placeholder="Votre message" required></textarea>
-            <button type="submit"><a href="mailto:alaejennine33@gmail.com" className="ButtonEnvoyer">Envoyer</a></button>
-          </form>
+          {/* Ligne verticale */}
+          <div className="footer-divider"></div>
+
+          {/* Section Réseaux sociaux */}
+          <div className="footer-social">
+            <h2>Suivez-nous</h2>
+            <div className="social-links">
+              <a href="#" className="social-link">Facebook</a>
+              <a href="#" className="social-link">Twitter</a>
+              <a href="#" className="social-link">Instagram</a>
+            </div>
+          </div>
+
+          {/* Ligne verticale */}
+          <div className="footer-divider"></div>
+
+          {/* Section Informations */}
+          <div className="footer-info">
+            <h2>À propos</h2>
+            <p>Majesti'Car est une plateforme moderne dédiée au lavage intelligent et écologique.</p>
+          </div>
         </div>
-        
-      <footer className="App-footer">
-        <p>&copy; 2024 MugiWash. Tous droits réservés.</p>
-        <div className="social-links">
-          <a href="#" className="social-link">Facebook</a>
-          <a href="#" className="social-link">Twitter</a>
-          <a href="#" className="social-link">Instagram</a>
+
+        <div className="footer-bottom">
+          <p>&copy; 2025 Majesti'Car. Tous droits réservés.</p>
         </div>
       </footer>
+
+
+
     </div>
   )
 }
