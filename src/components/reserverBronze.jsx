@@ -262,7 +262,7 @@ function reserverBronze() {
       console.log("📧 Email envoyé avec succès");
   
       // 🔹 3) Rediriger vers Stripe
-      const paymentLinkBase = "https://buy.stripe.com/test_4gMeVfbagad7bLxbSi1oI01";
+      const paymentLinkBase = "https://buy.stripe.com/test_eVq00ldio4SNaHt3lM1oI02";
       const successUrl = encodeURIComponent(
         `https://alaajee.github.io/MugiWash/reservation-success?payment=stripe&reservationId=${pendingId}`
       );

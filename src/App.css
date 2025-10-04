@@ -208,23 +208,6 @@ html, body {
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-/* Responsive pour mobiles */
-@media (max-width: 768px) {
-  .image-slogan {
-    font-size: 2.5rem;
-    letter-spacing: 1px;
-    bottom: 15px;
-  }
-}
-
-@media (max-width: 480px) {
-  .image-slogan {
-    font-size: 1.8rem;
-    letter-spacing: 0.5px;
-    bottom: 10px;
-    max-width: 95%;
-  }
-}
 
 
 .A_propos {
@@ -355,21 +338,68 @@ html, body {
   }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .A_propos {
-    padding: 40px 20px;
-    min-height: auto;
+/* Media query pour petits écrans (mobile) */
+@media screen and (max-width: 768px) {
+  .top-banner {
+    position: relative;
+    padding: 20px 10px;
   }
-  
+
+  .menu-container {
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    top: 0;
+    padding: 10px 0;
+  }
+
+  /* Cacher les items par défaut sur tablette */
+  .menu-item,
+  .Reserver-button {
+    display: none;
+    margin: 10px 0;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+  }
+
+  /* Afficher les items au hover du logo */
+  .menu-container:hover .menu-item,
+  .menu-container:hover .Reserver-button {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Garder le menu ouvert tant qu'on est dessus */
+  .menu-container:focus-within .menu-item,
+  .menu-container:focus-within .Reserver-button {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
   .A_propos h2 {
-    font-size: 2rem;
+    font-size: 2.5rem;
+  }
+
+  .A_propos p {
+    font-size: 1.1rem;
+    padding: 20px;
+  }
+
+  .image-slogan {
+    font-size: 1.5rem;
+    padding: 0 10px;
   }
   
-  .A_propos p {
-    font-size: 1rem;
+  .Mes_services {
+    bottom: 20px;
+
   }
+  
 }
+
 
 
 /* Each card */
@@ -687,7 +717,10 @@ html, body {
   background-color: #67b0e8;
 }
 
-
+.ButtonEnvoyer {
+  color: white;
+  text-decoration: none;
+}
 
 .App-footer {
   background-color: #2c3e50;

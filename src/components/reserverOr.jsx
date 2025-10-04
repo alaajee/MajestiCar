@@ -1,17 +1,19 @@
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import moment from "moment";
 import "moment/locale/fr";
 import emailjs from "emailjs-com";
 import { useReservations } from './ReservationsContext';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from './ReservationsContext';
 
 moment.locale('fr');
 const localizer = momentLocalizer(moment);
 
 function reserverOr() {
-  // UTILISATION DU CONTEXTE
+  const navigate = useNavigate();
   const { 
     reservations, 
     ajouterReservation, 
@@ -24,6 +26,7 @@ function reserverOr() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState(""); // "stripe" ou "cash"
   
   const [formData, setFormData] = useState({
     nom: "",
@@ -38,17 +41,15 @@ function reserverOr() {
     { id: "interieur", nom: "Shampouineuses siège, tapis et moquettes", prix: 25 },
     { id: "jantes", nom: "Lavage extérieur avec shampoing", prix: 20 },
     { id: "polish", nom: "Lavage moteur", prix: 15 },
-    { id: "cire", nom: "Elimination poils d’animaux", prix: 15 },
+    { id: "cire", nom: "Elimination poils d'animaux", prix: 15 },
     { id: "vitres", nom: "Véhicules très sale (ex: vomis..)", prix: 15 },
   ];
 
-  // Horaires disponibles dynamiques basés sur les réservations
   const getHorairesDisponiblesForDate = (date) => {
     if (!date) return [];
     return getHorairesDisponibles(date);
   };
 
-  // Convertir les réservations en événements pour le calendrier
   const events = reservations.map(resa => ({
     title: `${resa.heure} - ${resa.formule}`,
     start: new Date(resa.date),
@@ -62,9 +63,9 @@ function reserverOr() {
     
     if (slotInfo.start >= today) {
       setSelectedDate(slotInfo.start);
-      setSelectedTime(""); // Reset l'heure sélectionnée
-      setShowForm(false); // Reset le formulaire
-      console.log("Date sélectionnée:", slotInfo.start);
+      setSelectedTime("");
+      setShowForm(false);
+      setPaymentMethod("");
     } else {
       alert("Vous ne pouvez pas réserver dans le passé");
     }
@@ -95,7 +96,7 @@ function reserverOr() {
   };
 
   const calculerPrixTotal = () => {
-    const prixBase = 50;
+    const prixBase = 120;
     const prixOptions = selectedOptions.reduce((total, optionId) => {
       const option = optionsDisponibles.find(opt => opt.id === optionId);
       return total + (option ? option.prix : 0);
@@ -103,23 +104,101 @@ function reserverOr() {
     return prixBase + prixOptions;
   };
 
-  const handleSubmit = async (e) => {
+  // Paiement sur place
+  const handleCashPayment = async (e) => {
     e.preventDefault();
     
-    // Validation
     if (!selectedDate || !selectedTime) {
       alert("Veuillez sélectionner une date et une heure");
       return;
     }
 
-    // Validation email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       alert("Veuillez entrer un email valide");
       return;
     }
 
-    // Validation téléphone
+    const phoneRegex = /^[0-9\s+()-]{10,}$/;
+    if (!phoneRegex.test(formData.telephone)) {
+      alert("Veuillez entrer un numéro de téléphone valide");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const prixTotal = calculerPrixTotal();
+      
+      const optionsTexte = selectedOptions.length > 0
+        ? selectedOptions.map(optionId => {
+            const option = optionsDisponibles.find(opt => opt.id === optionId);
+            return `${option.nom} (+${option.prix}€)`;
+          }).join(', ')
+        : 'Aucune option supplémentaire';
+
+      // Enregistrer la réservation dans Firebase
+      await ajouterReservation(selectedDate, selectedTime, 'Bronze');
+
+      // Envoyer l'email de confirmation
+      const templateParams = {
+        from_name: `${formData.prenom} ${formData.nom}`,
+        from_email: formData.email,
+        phone: formData.telephone,
+        date: moment(selectedDate).format('DD/MM/YYYY'),
+        time: selectedTime,
+        service: `Formule Bronze - 50€`,
+        options: optionsTexte,
+        prix_total: `${prixTotal}€`,
+        payment_status: '💵 Paiement sur place'
+      };
+
+      // await emailjs.send(
+      //   'service_1wryoqr',
+      //   'template_x1vgr07',
+      //   templateParams,
+      //   'KUPBmz5lg0pubUDdW'
+      // );
+
+      // Rediriger vers une page de confirmation
+      const reservationData = {
+        nom: formData.nom,
+        prenom: formData.prenom,
+        email: formData.email,
+        telephone: formData.telephone,
+        date: moment(selectedDate).format('DD/MM/YYYY'),
+        dateISO: selectedDate.toISOString(),
+        heure: selectedTime,
+        options: selectedOptions,
+        optionsTexte: optionsTexte,
+        formule: 'Bronze',
+        prixTotal: prixTotal,
+        paymentMethod: 'cash'
+      };
+
+      navigate(`/reservation-success?data=${encodeURIComponent(JSON.stringify(reservationData))}&payment=cash`);
+
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert(`Erreur lors de la réservation: ${error.message || 'Veuillez réessayer.'}`);
+      setLoading(false);
+    }
+  };
+
+  const handleStripePayment = async (e) => {
+    e.preventDefault();
+  
+    if (!selectedDate || !selectedTime) {
+      alert("Veuillez sélectionner une date et une heure");
+      return;
+    }
+  
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      alert("Veuillez entrer un email valide");
+      return;
+    }
+  
     const phoneRegex = /^[0-9\s+()-]{10,}$/;
     if (!phoneRegex.test(formData.telephone)) {
       alert("Veuillez entrer un numéro de téléphone valide");
@@ -129,59 +208,84 @@ function reserverOr() {
     setLoading(true);
   
     try {
-      // Préparer le texte des options pour l'email
+      const prixTotal = calculerPrixTotal();
+  
       const optionsTexte = selectedOptions.length > 0
         ? selectedOptions.map(optionId => {
             const option = optionsDisponibles.find(opt => opt.id === optionId);
             return `${option.nom} (+${option.prix}€)`;
-          }).join(', ')
-        : 'Aucune option supplémentaire';
-
-      // 1️⃣ FIREBASE: Bloquer le créneau dans le calendrier
-      await ajouterReservation(selectedDate, selectedTime, 'Bronze');
-      
-      // 2️⃣ EMAILJS: Envoyer l'email avec TOUTES les infos
+          }).join(", ")
+        : "Aucune option supplémentaire";
+  
+      const pendingId = `pending_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+      const reservationData = {
+        nom: formData.nom,
+        prenom: formData.prenom,
+        email: formData.email,
+        telephone: formData.telephone,
+        date: moment(selectedDate).format("DD/MM/YYYY"),
+        dateISO: selectedDate.toISOString(),
+        heure: selectedTime,
+        formule: "Bronze",
+        options: selectedOptions,
+        optionsTexte: optionsTexte,
+        prixTotal: prixTotal,
+        status: "pending",
+        createdAt: new Date().toISOString(),
+        paymentMethod: "stripe"
+      };
+  
+      // 🔹 1) Sauvegarder la réservation en attente dans Firestore
+      await setDoc(doc(db, "pendingReservations", pendingId), reservationData);
+  
+      // 🔹 2) Envoyer l’email avec EmailJS
       const templateParams = {
         from_name: `${formData.prenom} ${formData.nom}`,
         from_email: formData.email,
         phone: formData.telephone,
-        date: moment(selectedDate).format('DD/MM/YYYY'),
+        date: moment(selectedDate).format("DD/MM/YYYY"),
         time: selectedTime,
-        service: 'Formule Bronze - 50€',
+        service: `Formule Bronze - 50€`,
         options: optionsTexte,
-        prix_total: `${calculerPrixTotal()}€`
+        prix_total: `${prixTotal}€`,
+        payment_status: "💳 Paiement en ligne (Stripe)"
       };
   
       await emailjs.send(
-        'service_1wryoqr',
-        'template_x1vgr07',
+        "service_1wryoqr",   
+        "template_x1vgr07",  
         templateParams,
-        'KUPBmz5lg0pubUDdW'
+        "KUPBmz5lg0pubUDdW" 
       );
-      
-      alert('Réservation confirmée ! Un email de confirmation vous a été envoyé.');
-      
-      // Reset
-      setFormData({ nom: "", prenom: "", email: "", telephone: "" });
-      setSelectedDate(null);
-      setSelectedTime("");
-      setShowForm(false);
-      setSelectedOptions([]);
-      
+  
+      console.log("📧 Email envoyé avec succès");
+  
+      // 🔹 3) Rediriger vers Stripe
+      const paymentLinkBase = "https://buy.stripe.com/test_6oUbJ33HOetn5n95tU1oI04";
+      const successUrl = encodeURIComponent(
+        `https://alaajee.github.io/MugiWash/reservation-success?payment=stripe&reservationId=${pendingId}`
+      );
+  
+      const paymentUrl = `${paymentLinkBase}?prefilled_email=${encodeURIComponent(formData.email)}&success_url=${successUrl}`;
+  
+      window.location.href = paymentUrl;
+  
     } catch (error) {
-      console.error('Erreur complète:', error);
-      alert(`Erreur lors de la réservation: ${error.message || 'Veuillez réessayer.'}`);
-    } finally {
+      console.error("Erreur:", error);
+      alert(`Erreur lors du paiement: ${error.message || "Veuillez réessayer."}`);
       setLoading(false);
     }
   };
+  
+
   const horairesDisponibles = selectedDate ? getHorairesDisponiblesForDate(selectedDate) : [];
   const reservationsJour = selectedDate ? getReservationsParDate(selectedDate) : [];
 
   return (
     <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
       <h1 style={{ textAlign: "center", color: "#2c5aa0", marginBottom: "2rem" }}>
-        Réservation Formule Bronze - 50€
+        Réservation Formule Or - 120€
       </h1>
 
       {/* CALENDRIER */}
@@ -234,7 +338,6 @@ function reserverOr() {
             📅 Date sélectionnée : <strong>{moment(selectedDate).format("dddd DD MMMM YYYY")}</strong>
           </p>
 
-          {/* Afficher les réservations existantes */}
           {reservationsJour.length > 0 && (
             <div style={{ 
               marginBottom: "1rem", 
@@ -411,7 +514,7 @@ function reserverOr() {
             )}
           </div>
 
-          <form onSubmit={handleSubmit}>
+          <form>
             <div style={{ 
               display: "grid", 
               gridTemplateColumns: "1fr 1fr", 
@@ -500,25 +603,149 @@ function reserverOr() {
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
+            {/* CHOIX DU MODE DE PAIEMENT */}
+            <div style={{ 
+              marginBottom: "2rem",
+              padding: "1.5rem",
+              background: "#f8f9fa",
+              borderRadius: "12px",
+              border: "2px solid #dee2e6"
+            }}>
+              <h3 style={{ color: "#2c5aa0", marginTop: 0, marginBottom: "1.5rem" }}>
+                💳 Mode de paiement
+              </h3>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <div
+                  onClick={() => setPaymentMethod("stripe")}
+                  style={{
+                    padding: "1.5rem",
+                    border: paymentMethod === "stripe" ? "3px solid #635bff" : "2px solid #ddd",
+                    background: paymentMethod === "stripe" ? "#f7f6ff" : "white",
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                    transition: "all 0.3s"
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                    <input
+                      type="radio"
+                      name="payment"
+                      checked={paymentMethod === "stripe"}
+                      onChange={() => setPaymentMethod("stripe")}
+                      style={{ width: "20px", height: "20px", cursor: "pointer" }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: "bold", fontSize: "1.1rem", marginBottom: "0.5rem" }}>
+                        💳 Paiement en ligne par carte
+                      </div>
+                      <div style={{ color: "#666", fontSize: "0.95rem" }}>
+                        Paiement sécurisé via Stripe • Confirmation immédiate
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  onClick={() => setPaymentMethod("cash")}
+                  style={{
+                    padding: "1.5rem",
+                    border: paymentMethod === "cash" ? "3px solid #28a745" : "2px solid #ddd",
+                    background: paymentMethod === "cash" ? "#f1f9f3" : "white",
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                    transition: "all 0.3s"
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                    <input
+                      type="radio"
+                      name="payment"
+                      checked={paymentMethod === "cash"}
+                      onChange={() => setPaymentMethod("cash")}
+                      style={{ width: "20px", height: "20px", cursor: "pointer" }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: "bold", fontSize: "1.1rem", marginBottom: "0.5rem" }}>
+                        💵 Paiement sur place
+                      </div>
+                      <div style={{ color: "#666", fontSize: "0.95rem" }}>
+                        Espèces ou carte le jour du rendez-vous • Total : {calculerPrixTotal()}€
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* BOUTONS DE PAIEMENT */}
+            {paymentMethod === "stripe" && (
+              <button
+                onClick={handleStripePayment}
+                disabled={loading}
+                style={{
+                  width: "100%",
+                  padding: "1.5rem",
+                  background: loading ? "#6c757d" : "#635bff",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "12px",
+                  fontSize: "1.2rem",
+                  fontWeight: "bold",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  transition: "background 0.3s"
+                }}
+              >
+                {loading ? "Redirection..." : `💳 Payer ${calculerPrixTotal()}€ avec Stripe`}
+              </button>
+            )}
+
+            {paymentMethod === "cash" && (
+              <button
+                onClick={handleCashPayment}
+                disabled={loading}
+                style={{
+                  width: "100%",
+                  padding: "1.5rem",
+                  background: loading ? "#6c757d" : "#28a745",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "12px",
+                  fontSize: "1.2rem",
+                  fontWeight: "bold",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  transition: "background 0.3s"
+                }}
+              >
+                {loading ? "Réservation en cours..." : `✅ Confirmer la réservation (${calculerPrixTotal()}€ sur place)`}
+              </button>
+            )}
+
+            {!paymentMethod && (
+              <div style={{
                 width: "100%",
                 padding: "1.5rem",
-                background: loading ? "#6c757d" : "#28a745",
-                color: "white",
-                border: "none",
+                background: "#e9ecef",
+                color: "#6c757d",
+                border: "2px dashed #adb5bd",
                 borderRadius: "12px",
-                fontSize: "1.2rem",
+                fontSize: "1.1rem",
                 fontWeight: "bold",
-                cursor: loading ? "not-allowed" : "pointer",
-                transition: "background 0.3s"
-              }}
-            >
-              {loading ? "Envoi en cours..." : `Confirmer la réservation - ${calculerPrixTotal()}€`}
-            </button>
+                textAlign: "center"
+              }}>
+                ⬆️ Veuillez choisir un mode de paiement
+              </div>
+            )}
           </form>
+
+          <p style={{ 
+            marginTop: "1rem", 
+            textAlign: "center", 
+            color: "#666",
+            fontSize: "0.9rem"
+          }}>
+            🔒 Vos données sont sécurisées et ne seront pas partagées
+          </p>
         </div>
       )}
 

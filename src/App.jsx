@@ -29,17 +29,17 @@ function App() {
       <header className="App-header">
         <div className="menu-container">
           <img src={image2} alt="Logo MugiWash" className="menu-logo" />
-
+          
           <a href="/MugiWash" className="menu-item">Home</a>
           <a href="#" className="menu-item">A propos</a>
-          <a href="#" className="menu-item">Services</a>
+          <a onClick={scrollToServices} className="menu-item">Services</a>
           <a href="#" className="menu-item">Contact</a>
           <a href="#" className="menu-item">MugiWash</a>
        
          
-          <Link to="/reserver" className="Reserver-button">
+          <button onClick={scrollToServices} className='Reserver-button'>
               Réserver
-          </Link>
+          </button>
 
         </div>
       </header>
@@ -154,7 +154,7 @@ function App() {
             <input type="text" placeholder="Votre nom" required />
             <input type="email" placeholder="Votre email" required />
             <textarea placeholder="Votre message" required></textarea>
-            <button type="submit">Envoyer</button>
+            <button type="submit"><a href="mailto:alaejennine33@gmail.com" className="ButtonEnvoyer">Envoyer</a></button>
           </form>
         </div>
         
