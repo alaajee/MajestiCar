@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import moment from "moment";
 import "moment/locale/fr";
-import emailjs from "emailjs-com";
 import { useReservations } from './ReservationsContext';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from './ReservationsContext';

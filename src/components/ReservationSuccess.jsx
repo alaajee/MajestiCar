@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useReservations } from './ReservationsContext';
 import { doc, getDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
@@ -12,125 +12,88 @@ moment.locale('fr');
 function ReservationSuccess() {
   const [searchParams] = useSearchParams();
   const { ajouterReservation } = useReservations();
-  
+
   const [status, setStatus] = useState('loading');
   const [reservationInfo, setReservationInfo] = useState(null);
   const [isCashPayment, setIsCashPayment] = useState(false);
 
+  // Flag pour éviter les exécutions multiples
+  const executedRef = useRef(false);
+
   useEffect(() => {
+    if (executedRef.current) return; 
+    executedRef.current = true;
+
     const finaliserReservation = async () => {
       try {
         console.log('=== DÉBUT FINALISATION ===');
-        console.log('URL complète:', window.location.href);
-        
         const paymentType = searchParams.get('payment');
-        
-        // Récupérer l'ID depuis sessionStorage (Stripe) ou URL (Cash)
         let reservationId = searchParams.get('reservationId');
-        
+
         if (paymentType === 'stripe' && !reservationId) {
           reservationId = sessionStorage.getItem('stripe_pending_reservation');
-          console.log('ID récupéré depuis sessionStorage:', reservationId);
         }
-        
-        console.log('Payment type:', paymentType);
-        console.log('Reservation ID:', reservationId);
-        
+
         if (!paymentType) {
-          throw new Error('Paramètre "payment" manquant dans l\'URL');
+          throw new Error('Paramètre "payment" manquant dans l’URL');
         }
-        
+
         const storageKey = `reservation_processed_${reservationId || 'cash'}`;
-        
-        // Vérifier si déjà traité
         if (sessionStorage.getItem(storageKey)) {
-          console.log('Réservation déjà traitée');
+          console.log('Réservation déjà traitée.');
           const savedData = sessionStorage.getItem(`reservation_data_${reservationId || 'cash'}`);
           if (savedData) {
             const data = JSON.parse(savedData);
             setReservationInfo(data);
             setIsCashPayment(data.paymentMethod === 'cash');
             setStatus('success');
-            return;
           }
+          return;
         }
-        
-        let data;
 
-        // ========== CAS 1 : PAIEMENT STRIPE ==========
+        let data;
+        let docRef;
+
+        // ======== CAS 1 : PAIEMENT STRIPE ========
         if (paymentType === 'stripe') {
           console.log('💳 Mode Stripe détecté');
-          
-          let reservationId = searchParams.get('reservationId');
-          let docRef; // ✅ Déclarer docRef ici
-          
+
           if (!reservationId) {
-            reservationId = sessionStorage.getItem('stripe_pending_reservation');
-            console.log('📥 ID récupéré depuis sessionStorage:', reservationId);
-          }
-          
-          if (!reservationId) {
-            // SI TOUJOURS PAS D'ID : Chercher par email du client
             const clientEmail = sessionStorage.getItem('stripe_pending_email');
-            
             if (clientEmail) {
-              console.log('🔍 Recherche par email:', clientEmail);
-              
-              const { collection, query, where, getDocs } = await import('firebase/firestore');
-              
               const q = query(
                 collection(db, 'pendingReservations'),
                 where('email', '==', clientEmail),
                 where('status', '==', 'pending')
               );
-              
               const querySnapshot = await getDocs(q);
-              
               if (!querySnapshot.empty) {
                 const foundDoc = querySnapshot.docs[0];
                 reservationId = foundDoc.id;
                 data = foundDoc.data();
-                docRef = doc(db, 'pendingReservations', reservationId); // ✅ Créer docRef
-                console.log('✅ Réservation trouvée par email:', reservationId);
+                docRef = doc(db, 'pendingReservations', reservationId);
               } else {
-                throw new Error('Aucune réservation en attente trouvée pour cet email');
+                throw new Error('Aucune réservation trouvée pour cet email');
               }
             } else {
               throw new Error('Impossible de retrouver la réservation');
             }
           } else {
-            // Récupération normale par ID
-            console.log('📥 Récupération depuis Firebase...');
-            docRef = doc(db, 'pendingReservations', reservationId); // ✅ Créer docRef
+            docRef = doc(db, 'pendingReservations', reservationId);
             const docSnap = await getDoc(docRef);
-            
             if (!docSnap.exists()) {
-              throw new Error(`Réservation ${reservationId} non trouvée dans Firebase`);
+              throw new Error(`Réservation ${reservationId} non trouvée`);
             }
-            
             data = docSnap.data();
-            console.log('✅ Données récupérées:', data);
           }
-          
-          // Marquer comme traité AVANT toute opération
+
           sessionStorage.setItem(storageKey, 'true');
           sessionStorage.setItem(`reservation_data_${reservationId}`, JSON.stringify(data));
-          
-          // 1. Enregistrer dans reservations confirmées
-          console.log('💾 Enregistrement dans reservations...');
-          await ajouterReservation(
-            new Date(data.dateISO), 
-            data.heure, 
-            data.formule
-          );
-          console.log('✅ Réservation enregistrée');
-          
-          // 2. Supprimer la réservation pending
-          console.log('🗑️ Suppression pending...');
+
+          await ajouterReservation(new Date(data.dateISO), data.heure, data.formule);
           await deleteDoc(docRef);
-          console.log('✅ Pending supprimée');
-          
-          // 3. ENVOI DES EMAILS
+
+          // ENVOI EMAIL CLIENT
           const templateParams = {
             from_name: `${data.prenom} ${data.nom}`,
             from_email: data.email,
@@ -143,65 +106,52 @@ function ReservationSuccess() {
             payment_status: '✅ Payé via Stripe'
           };
 
-          // Email au CLIENT
           try {
             await emailjs.send(
-              'service_1wryoqr',
-              'template_x1vgr07',
+              'service_dfuagfb',
+              'template_n1xx78h',
               templateParams,
-              'KUPBmz5lg0pubUDdW'
+              'PEOGgjS79RXoYneNz'
             );
             console.log('✅ Email client envoyé');
-          } catch (emailError) {
-            console.error('❌ Erreur email client:', emailError);
+          } catch (err) {
+            console.error('❌ Erreur email client:', err);
           }
 
-          // Email à l'ADMIN
+          // ENVOI EMAIL ADMIN (template séparé)
           try {
             const templateParamsAdmin = {
               ...templateParams,
-              to_email: "votre-email@exemple.com"  // 👈 REMPLACEZ PAR VOTRE EMAIL
+              to_email: "alaajenn7@gmail.com",
+              admin_message: `Nouvelle réservation Stripe : ${data.prenom} ${data.nom}, ${data.date} à ${data.heure}`,
             };
 
             await emailjs.send(
-              'service_1wryoqr',
-              'template_x1vgr07',
+              'service_dfuagfb',
+              'template_admin', // ⚠️ crée ce template dans EmailJS
               templateParamsAdmin,
-              'KUPBmz5lg0pubUDdW'
+              'PEOGgjS79RXoYneNz'
             );
             console.log('✅ Email admin envoyé');
-          } catch (emailError) {
-            console.error('❌ Erreur email admin:', emailError);
+          } catch (err) {
+            console.error('❌ Erreur email admin:', err);
           }
 
-          // Nettoyer sessionStorage
           sessionStorage.removeItem('stripe_pending_reservation');
-        } 
-        // ========== CAS 2 : PAIEMENT CASH ==========
+        }
+
+        // ======== CAS 2 : PAIEMENT CASH ========
         else if (paymentType === 'cash') {
           console.log('💵 Mode Cash détecté');
           const dataParam = searchParams.get('data');
-          
-          if (!dataParam) {
-            throw new Error('Paramètre "data" manquant pour paiement cash');
-          }
-          
+          if (!dataParam) throw new Error('Paramètre "data" manquant');
           data = JSON.parse(decodeURIComponent(dataParam));
-          console.log('✅ Données cash récupérées:', data);
-          
-          // Marquer comme traité
+
           sessionStorage.setItem(storageKey, 'true');
           sessionStorage.setItem(`reservation_data_cash`, JSON.stringify(data));
-          
-          // Enregistrer dans Firebase
-          await ajouterReservation(
-            new Date(data.dateISO), 
-            data.heure, 
-            data.formule
-          );
-          console.log('✅ Réservation enregistrée');
-          
-          // ENVOI DES EMAILS
+
+          await ajouterReservation(new Date(data.dateISO), data.heure, data.formule);
+
           const templateParams = {
             from_name: `${data.prenom} ${data.nom}`,
             from_email: data.email,
@@ -214,42 +164,41 @@ function ReservationSuccess() {
             payment_status: '💵 Paiement sur place'
           };
 
-          // Email au CLIENT
           try {
             await emailjs.send(
-              'service_1wryoqr',
-              'template_x1vgr07',
+              'service_dfuagfb',
+              'template_n1xx78h',
               templateParams,
-              'KUPBmz5lg0pubUDdW'
+              'PEOGgjS79RXoYneNz'
             );
             console.log('✅ Email client envoyé');
-          } catch (emailError) {
-            console.error('❌ Erreur email client:', emailError);
+          } catch (err) {
+            console.error('❌ Erreur email client:', err);
           }
 
-          // Email à l'ADMIN
           try {
             const templateParamsAdmin = {
               ...templateParams,
-              to_email: "votre-email@exemple.com"  // 👈 REMPLACEZ PAR VOTRE EMAIL
+              to_email: "alaajenn7@gmail.com",
+              admin_message: `Nouvelle réservation CASH : ${data.prenom} ${data.nom}, ${data.date} à ${data.heure}`,
             };
 
             await emailjs.send(
-              'service_1wryoqr',
-              'template_x1vgr07',
+              'service_dfuagfb',
+              'template_admin',
               templateParamsAdmin,
-              'KUPBmz5lg0pubUDdW'
+              'PEOGgjS79RXoYneNz'
             );
             console.log('✅ Email admin envoyé');
-          } catch (emailError) {
-            console.error('❌ Erreur email admin:', emailError);
+          } catch (err) {
+            console.error('❌ Erreur email admin:', err);
           }
         }
 
         setReservationInfo(data);
         setIsCashPayment(paymentType === 'cash');
         setStatus('success');
-        
+
       } catch (error) {
         console.error('❌ ERREUR FINALE:', error);
         setStatus('error');
@@ -258,6 +207,7 @@ function ReservationSuccess() {
 
     finaliserReservation();
   }, [searchParams, ajouterReservation]);
+
 
   // ========== ÉCRAN DE CHARGEMENT ==========
   if (status === 'loading') {
