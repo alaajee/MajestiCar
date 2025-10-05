@@ -176,14 +176,7 @@ function reserverBronze() {
         payment_status: "💵 Paiement sur place"
       };
   
-      await emailjs.send(
-        "service_1wryoqr",   
-        "template_x1vgr07",  
-        templateParams,
-        "KUPBmz5lg0pubUDdW" 
-      );
-  
-      console.log("📧 Email envoyé avec succès");
+     
   
       // 3. Redirection vers la page de succès
       const reservationData = {
@@ -242,8 +235,10 @@ function reserverBronze() {
           }).join(", ")
         : "Aucune option supplémentaire";
   
+      // Créer un ID unique pour cette réservation
       const pendingId = `pending_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
+      // Enregistrer dans Firebase (collection "pendingReservations")
       const reservationData = {
         nom: formData.nom,
         prenom: formData.prenom,
@@ -252,45 +247,30 @@ function reserverBronze() {
         date: moment(selectedDate).format("DD/MM/YYYY"),
         dateISO: selectedDate.toISOString(),
         heure: selectedTime,
-        formule: "Argent",
+        formule: "Bronze",
         options: selectedOptions,
         optionsTexte: optionsTexte,
         prixTotal: prixTotal,
         status: "pending",
-        createdAt: new Date().toISOString(),
-        paymentMethod: "stripe"
+        paymentMethod: "stripe",  // ✅ STRIPE, pas cash !
+        createdAt: new Date().toISOString()
       };
   
       await setDoc(doc(db, "pendingReservations", pendingId), reservationData);
+      console.log("✅ Réservation pending créée:", pendingId);
   
-      const templateParams = {
-        from_name: `${formData.prenom} ${formData.nom}`,
-        from_email: formData.email,
-        phone: formData.telephone,
-        date: moment(selectedDate).format("DD/MM/YYYY"),
-        time: selectedTime,
-        service: `Formule Argent - 80€`,
-        options: optionsTexte,
-        prix_total: `${prixTotal}€`,
-        payment_status: "💳 Paiement en ligne (Stripe)"
-      };
+      // SAUVEGARDER l'ID dans sessionStorage AVANT la redirection
+      sessionStorage.setItem('stripe_pending_reservation', pendingId);
+      sessionStorage.setItem('stripe_pending_email', formData.email);
+      console.log("💾 ID sauvegardé dans sessionStorage:", pendingId);
   
-      await emailjs.send(
-        "service_1wryoqr",   
-        "template_x1vgr07",  
-        templateParams,
-        "KUPBmz5lg0pubUDdW" 
-      );
-  
-      console.log("📧 Email envoyé avec succès");
-  
+      // Lien de paiement Stripe
       const paymentLinkBase = "https://buy.stripe.com/test_eVq00ldio4SNaHt3lM1oI02";
-      const successUrl = encodeURIComponent(
-        `https://alaajee.github.io/MugiWash/reservation-success?payment=stripe&reservationId=${pendingId}`
-      );
-  
-      const paymentUrl = `${paymentLinkBase}?prefilled_email=${encodeURIComponent(formData.email)}&success_url=${successUrl}`;
-  
+      
+      // URL de redirection (sans paramètres dynamiques, juste payment=stripe)
+      const paymentUrl = `${paymentLinkBase}?prefilled_email=${encodeURIComponent(formData.email)}`;
+      
+      console.log("🔗 Redirection vers Stripe");
       window.location.href = paymentUrl;
   
     } catch (error) {
