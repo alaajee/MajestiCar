@@ -135,21 +135,21 @@ function reserverBronze() {
       alert("Veuillez sélectionner une date et une heure");
       return;
     }
-
+  
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       alert("Veuillez entrer un email valide");
       return;
     }
-
+  
     const phoneRegex = /^[0-9\s+()-]{10,}$/;
     if (!phoneRegex.test(formData.telephone)) {
       alert("Veuillez entrer un numéro de téléphone valide");
       return;
     }
-
+  
     setLoading(true);
-
+  
     try {
       const prixTotal = calculerPrixTotal();
       
@@ -159,9 +159,33 @@ function reserverBronze() {
             return `${option.nom} (+${option.prix}€)`;
           }).join(', ')
         : 'Aucune option supplémentaire';
-
-      await ajouterReservation(selectedDate, selectedTime, 'Argent');
-
+  
+      // 1. Enregistrer dans Firebase
+      await ajouterReservation(selectedDate, selectedTime, 'Bronze');
+  
+      // 2. ENVOI EMAIL - C'ÉTAIT MANQUANT !
+      const templateParams = {
+        from_name: `${formData.prenom} ${formData.nom}`,
+        from_email: formData.email,
+        phone: formData.telephone,
+        date: moment(selectedDate).format("DD/MM/YYYY"),
+        time: selectedTime,
+        service: `Formule Bronze - 50€`,
+        options: optionsTexte,
+        prix_total: `${prixTotal}€`,
+        payment_status: "💵 Paiement sur place"
+      };
+  
+      await emailjs.send(
+        "service_1wryoqr",   
+        "template_x1vgr07",  
+        templateParams,
+        "KUPBmz5lg0pubUDdW" 
+      );
+  
+      console.log("📧 Email envoyé avec succès");
+  
+      // 3. Redirection vers la page de succès
       const reservationData = {
         nom: formData.nom,
         prenom: formData.prenom,
@@ -172,13 +196,13 @@ function reserverBronze() {
         heure: selectedTime,
         options: selectedOptions,
         optionsTexte: optionsTexte,
-        formule: 'Argent',
+        formule: 'Bronze',
         prixTotal: prixTotal,
         paymentMethod: 'cash'
       };
-
+  
       navigate(`/reservation-success?data=${encodeURIComponent(JSON.stringify(reservationData))}&payment=cash`);
-
+  
     } catch (error) {
       console.error('Erreur:', error);
       alert(`Erreur lors de la réservation: ${error.message || 'Veuillez réessayer.'}`);
