@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useReservations } from './ReservationsContext';
-import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from './ReservationsContext';
 import emailjs from 'emailjs-com';
 import moment from 'moment';
@@ -61,8 +61,8 @@ function ReservationSuccess() {
         if (paymentType === 'stripe') {
           console.log('💳 Mode Stripe détecté');
           
-          // NOUVEAU : Chercher par email au lieu de l'ID
           let reservationId = searchParams.get('reservationId');
+          let docRef; // ✅ Déclarer docRef ici
           
           if (!reservationId) {
             reservationId = sessionStorage.getItem('stripe_pending_reservation');
@@ -76,7 +76,6 @@ function ReservationSuccess() {
             if (clientEmail) {
               console.log('🔍 Recherche par email:', clientEmail);
               
-              // Importer query, where, getDocs en haut du fichier
               const { collection, query, where, getDocs } = await import('firebase/firestore');
               
               const q = query(
@@ -88,10 +87,10 @@ function ReservationSuccess() {
               const querySnapshot = await getDocs(q);
               
               if (!querySnapshot.empty) {
-                // Prendre la première (normalement il n'y en a qu'une)
-                const doc = querySnapshot.docs[0];
-                reservationId = doc.id;
-                data = doc.data();
+                const foundDoc = querySnapshot.docs[0];
+                reservationId = foundDoc.id;
+                data = foundDoc.data();
+                docRef = doc(db, 'pendingReservations', reservationId); // ✅ Créer docRef
                 console.log('✅ Réservation trouvée par email:', reservationId);
               } else {
                 throw new Error('Aucune réservation en attente trouvée pour cet email');
@@ -102,7 +101,7 @@ function ReservationSuccess() {
           } else {
             // Récupération normale par ID
             console.log('📥 Récupération depuis Firebase...');
-            const docRef = doc(db, 'pendingReservations', reservationId);
+            docRef = doc(db, 'pendingReservations', reservationId); // ✅ Créer docRef
             const docSnap = await getDoc(docRef);
             
             if (!docSnap.exists()) {
