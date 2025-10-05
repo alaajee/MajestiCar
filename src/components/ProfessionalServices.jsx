@@ -177,7 +177,7 @@ const ServicesSection = () => {
       `}</style>
 
       <section className="services-container">
-        <h2 className="services-title">Pourquoi choisir MugiWash ?</h2>
+        <h2 className="services-title">Pourquoi choisir Majesti'Car ?</h2>
         <p className="services-subtitle">
           Découvrez les avantages qui font de nous votre partenaire de confiance
         </p>
