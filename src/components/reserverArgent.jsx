@@ -1,5 +1,3 @@
-import { Calendar, momentLocalizer } from "react-big-calendar";
-import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import moment from "moment";
@@ -7,12 +5,11 @@ import "moment/locale/fr";
 import { useReservations } from './ReservationsContext';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from './ReservationsContext';
+import { Calendar, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 
 moment.locale('fr');
-const localizer = momentLocalizer(moment);
 
 function reserverArgent() {
-  
   const navigate = useNavigate();
   const { 
     reservations, 
@@ -25,9 +22,9 @@ function reserverArgent() {
     window.scrollTo(0, 0);
   }, []);
 
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState("");
-  const [currentDate, setCurrentDate] = useState(new Date());
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -36,66 +33,70 @@ function reserverArgent() {
     nom: "",
     prenom: "",
     email: "",
-    telephone: ""
+    telephone: "",
+    adresse: ""
   });
 
   const [selectedOptions, setSelectedOptions] = useState([]);
 
   const optionsDisponibles = [
-    { id: "interieur", nom: "Shampouineuses siège, tapis et moquettes", prix: 25 },
-    { id: "jantes", nom: "Lavage extérieur avec shampoing", prix: 20 },
-    { id: "polish", nom: "Lavage moteur", prix: 15 },
-    { id: "cire", nom: "Elimination poils d'animaux", prix: 15 },
-    { id: "vitres", nom: "Véhicules très sale (ex: vomis..)", prix: 15 },
+    { id: "interieur", nom: "🧽 Shampouineuse tapis & moquettes", prix: 15 },
+    { id: "jantes", nom: "🐾 Élimination poils d’animaux", prix: 15 },
+    { id: "polish", nom: "🚗 Lavage extérieur", prix: 20 },
+    { id: "cire", nom: "⚙️ Lavage moteur", prix: 15 },
+    { id: "vitres", nom: "🛞 Lavage jantes", prix: 10 },
+    { id: "trappe", nom: "⛽ Dégraissage trappe à carburant", prix: 10 },
   ];
 
-  const getHorairesDisponiblesForDate = (date) => {
-    if (!date) return [];
-    return getHorairesDisponibles(date);
+  // Navigation mois
+  const changerMois = (direction) => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(currentDate.getMonth() + direction);
+    setCurrentDate(newDate);
   };
 
-  // const events = reservations.map(resa => ({
-  //   title: `${resa.heure} - ${resa.formule}`,
-  //   start: new Date(resa.date),
-  //   end: new Date(resa.date),
-  //   allDay: true
-  // }));
+  // Générer les jours du mois
+  const getDaysInMonth = () => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
 
-  // Fonction pour gérer le clic sur une date (mobile-friendly)
-  const handleSelectSlot = (slotInfo) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const days = [];
     
-    if (slotInfo.start >= today) {
-      setSelectedDate(slotInfo.start);
-      setSelectedTime("");
-      setShowForm(false);
-      setPaymentMethod("");
-    } else {
-      alert("Vous ne pouvez pas réserver dans le passé");
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null);
     }
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(new Date(year, month, day));
+    }
+    
+    return days;
   };
 
-  // Nouvelle fonction pour le clic direct sur un événement de date
-  const handleDateClick = (date) => {
+  const isToday = (date) => {
+    if (!date) return false;
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+
+  const isPastDate = (date) => {
+    if (!date) return true;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
-    const clickedDate = new Date(date);
-    clickedDate.setHours(0, 0, 0, 0);
-    
-    if (clickedDate >= today) {
+    return date < today;
+  };
+
+  const handleDateSelect = (date) => {
+    if (!isPastDate(date)) {
       setSelectedDate(date);
       setSelectedTime("");
       setShowForm(false);
       setPaymentMethod("");
-    } else {
-      alert("Vous ne pouvez pas réserver dans le passé");
     }
-  };
-
-  const handleNavigate = (date) => {
-    setCurrentDate(date);
   };
 
   const handleInputChange = (e) => {
@@ -119,7 +120,7 @@ function reserverArgent() {
   };
 
   const calculerPrixTotal = () => {
-    const prixBase = 80;
+    const prixBase =80;
     const prixOptions = selectedOptions.reduce((total, optionId) => {
       const option = optionsDisponibles.find(opt => opt.id === optionId);
       return total + (option ? option.prix : 0);
@@ -159,30 +160,14 @@ function reserverArgent() {
           }).join(', ')
         : 'Aucune option supplémentaire';
   
-      // 1. Enregistrer dans Firebase
       await ajouterReservation(selectedDate, selectedTime, 'Bronze');
   
-      // 2. ENVOI EMAIL - C'ÉTAIT MANQUANT !
-      const templateParams = {
-        from_name: `${formData.prenom} ${formData.nom}`,
-        from_email: formData.email,
-        phone: formData.telephone,
-        date: moment(selectedDate).format("DD/MM/YYYY"),
-        time: selectedTime,
-        service: `Formule Bronze - 50€`,
-        options: optionsTexte,
-        prix_total: `${prixTotal}€`,
-        payment_status: "💵 Paiement sur place"
-      };
-  
-     
-  
-      // 3. Redirection vers la page de succès
       const reservationData = {
         nom: formData.nom,
         prenom: formData.prenom,
         email: formData.email,
         telephone: formData.telephone,
+        adresse: formData.adresse,
         date: moment(selectedDate).format('DD/MM/YYYY'),
         dateISO: selectedDate.toISOString(),
         heure: selectedTime,
@@ -234,10 +219,8 @@ function reserverArgent() {
           }).join(", ")
         : "Aucune option supplémentaire";
   
-      // Créer un ID unique pour cette réservation
       const pendingId = `pending_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
-      // Enregistrer dans Firebase (collection "pendingReservations")
       const reservationData = {
         nom: formData.nom,
         prenom: formData.prenom,
@@ -251,25 +234,18 @@ function reserverArgent() {
         optionsTexte: optionsTexte,
         prixTotal: prixTotal,
         status: "pending",
-        paymentMethod: "stripe",  // ✅ STRIPE, pas cash !
+        paymentMethod: "stripe",
         createdAt: new Date().toISOString()
       };
   
       await setDoc(doc(db, "pendingReservations", pendingId), reservationData);
-      console.log("✅ Réservation pending créée:", pendingId);
   
-      // SAUVEGARDER l'ID dans sessionStorage AVANT la redirection
       sessionStorage.setItem('stripe_pending_reservation', pendingId);
       sessionStorage.setItem('stripe_pending_email', formData.email);
-      console.log("💾 ID sauvegardé dans sessionStorage:", pendingId);
   
-      // Lien de paiement Stripe
       const paymentLinkBase = "https://buy.stripe.com/test_eVq00ldio4SNaHt3lM1oI02";
-      
-      // URL de redirection (sans paramètres dynamiques, juste payment=stripe)
       const paymentUrl = `${paymentLinkBase}?prefilled_email=${encodeURIComponent(formData.email)}`;
       
-      console.log("🔗 Redirection vers Stripe");
       window.location.href = paymentUrl;
   
     } catch (error) {
@@ -279,104 +255,61 @@ function reserverArgent() {
     }
   };
   
-  const horairesDisponibles = selectedDate ? getHorairesDisponiblesForDate(selectedDate) : [];
-  const reservationsJour = selectedDate ? getReservationsParDate(selectedDate) : [];
+  const horairesDisponibles = selectedDate ? getHorairesDisponibles(selectedDate) : [];
+  const days = getDaysInMonth();
+  const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 
+                      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+  const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
-      <style>{`
-        .rbc-calendar {
-          transition: all 0.3s ease;
-        }
-        .rbc-day-bg {
-          transition: background-color 0.2s ease;
-          cursor: pointer;
-        }
-        .rbc-day-bg:hover {
-          background-color: #f0f7ff !important;
-        }
-        .rbc-selected {
-          background-color: #2c5aa0 !important;
-        }
-        .rbc-today {
-          background-color: #e3f2fd;
-        }
-        .rbc-off-range-bg {
-          background-color: #fafafa;
-        }
-        .rbc-date-cell {
-          padding: 8px;
-          transition: all 0.2s ease;
-          cursor: pointer;
-        }
-        .rbc-date-cell:hover {
-          transform: scale(1.05);
-        }
-        .rbc-button-link {
-          transition: color 0.2s ease;
-          cursor: pointer;
-        }
-        .rbc-button-link:hover {
-          color: #2c5aa0;
-        }
-        .rbc-active {
-          background-color: #2c5aa0 !important;
-          color: white !important;
-          box-shadow: 0 2px 8px rgba(44, 90, 160, 0.3);
-        }
-        .rbc-toolbar button {
-          transition: all 0.2s ease;
-          border-radius: 6px;
-        }
-        .rbc-toolbar button:hover {
-          background-color: #2c5aa0;
-          color: white;
-          transform: translateY(-1px);
-        }
-        
-        /* Mobile: rendre les dates plus cliquables */
-        @media (max-width: 768px) {
-          .rbc-date-cell {
-            padding: 12px 8px;
-            min-height: 50px;
-          }
-          .rbc-button-link {
-            padding: 8px;
-            display: block;
-          }
-        }
-      `}</style>
-
-      <h1 style={{ textAlign: "center", color: "#2c5aa0", marginBottom: "2rem" }}>
-        Réservation Formule Argent - 80€
-      </h1>
-
-      {/* ÉTAPE 1 : OPTIONS SUPPLÉMENTAIRES */}
-      <div style={{ 
-        marginTop: "2rem", 
-        padding: "2rem", 
-        background: "#fff8e1", 
-        borderRadius: "12px",
-        border: "2px solid #ffc107"
-      }}>
-        <h2 style={{ color: "#2c5aa0", marginBottom: "1rem" }}>
-          Étape 1 : Options supplémentaires (facultatif)
-        </h2>
-        <p style={{ color: "#666", marginBottom: "1.5rem" }}>
-          Améliorez votre prestation avec nos options premium
-        </p>
-
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", 
-          gap: "1rem"
+    <div style={{ 
+      padding: "1rem", 
+      maxWidth: "600px", 
+      margin: "0 auto",
+      minHeight: "100vh",
+      backgroundColor: "white"
+    }}>
+      {/* Header */}
+      <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+        <h1 style={{ 
+          color: "#2c5aa0", 
+          fontSize: "1.5rem",
+          marginBottom: "0.5rem"
         }}>
+          Réservation Formule Argent
+        </h1>
+        <p style={{ 
+          color: "#666",
+          fontSize: "1.2rem",
+          fontWeight: "bold"
+        }}>
+          80€
+        </p>
+      </div>
+
+      {/* ÉTAPE 1 : OPTIONS */}
+      <div style={{ 
+        marginBottom: "1.5rem", 
+        padding: "1rem", 
+        background: "white", 
+        borderRadius: "12px",
+        border: "2px solid #2c5aa0"
+      }}>
+        <h2 style={{ 
+          color: "#2c5aa0", 
+          marginBottom: "1rem",
+          fontSize: "1.2rem"
+        }}>
+          Étape 1 : Options supplémentaires
+        </h2>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
           {optionsDisponibles.map((option) => (
             <div
               key={option.id}
               onClick={() => toggleOption(option.id)}
               style={{
-                padding: "1rem",
+                padding: "0.75rem",
                 border: selectedOptions.includes(option.id) 
                   ? "2px solid #2c5aa0" 
                   : "1px solid #ddd",
@@ -385,41 +318,38 @@ function reserverArgent() {
                   : "white",
                 borderRadius: "8px",
                 cursor: "pointer",
-                transition: "all 0.3s",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                transform: selectedOptions.includes(option.id) ? "scale(1.02)" : "scale(1)"
+                transition: "all 0.3s"
               }}
             >
-              <div>
-                <input
-                  type="checkbox"
-                  checked={selectedOptions.includes(option.id)}
-                  onChange={() => {}}
-                  style={{ marginRight: "0.5rem", cursor: "pointer" }}
-                />
-                <strong>{option.nom}</strong>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ fontSize: "0.9rem" }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedOptions.includes(option.id)}
+                    onChange={() => {}}
+                    style={{ marginRight: "0.5rem" }}
+                  />
+                  {option.nom}
+                </div>
+                <span style={{ 
+                  color: "#2c5aa0", 
+                  fontWeight: "bold"
+                }}>
+                  +{option.prix}€
+                </span>
               </div>
-              <span style={{ 
-                color: "#2c5aa0", 
-                fontWeight: "bold",
-                fontSize: "1.1rem"
-              }}>
-                +{option.prix}€
-              </span>
             </div>
           ))}
         </div>
 
         <div style={{ 
-          marginTop: "1.5rem", 
-          padding: "1rem", 
+          marginTop: "1rem", 
+          padding: "0.75rem", 
           background: "#2c5aa0",
           color: "white",
           borderRadius: "8px",
           textAlign: "center",
-          fontSize: "1.3rem",
+          fontSize: "1.1rem",
           fontWeight: "bold"
         }}>
           Prix total : {calculerPrixTotal()}€
@@ -427,117 +357,202 @@ function reserverArgent() {
       </div>
 
       {/* ÉTAPE 2 : CALENDRIER */}
-      <div style={{ marginTop: "2rem" }}>
-        <h2 style={{ color: "#2c5aa0" }}>Étape 2 : Sélectionnez une date</h2>
-        
-        <div style={{ 
-          height: "600px", 
-          marginTop: "1rem",
-          borderRadius: "12px",
-          overflow: "hidden",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+      <div style={{ 
+        marginBottom: "1.5rem",
+        background: "white",
+        border: "2px solid #2c5aa0",
+        borderRadius: "12px",
+        padding: "1rem"
+      }}>
+        <h2 style={{ 
+          color: "#2c5aa0",
+          marginBottom: "1rem",
+          fontSize: "1.2rem"
         }}>
-          <Calendar
-            localizer={localizer}
-            events={[]}
-            startAccessor="start"
-            endAccessor="end"
-            style={{ height: "100%" }}
-            onSelectSlot={handleSelectSlot}
-            onSelectEvent={(event) => handleDateClick(event.start)}
-            onNavigate={handleNavigate}
-            onDrillDown={handleDateClick}
-            date={currentDate}
-            selectable
-            views={['month']}
-            defaultView="month"
-            longPressThreshold={10}
-            messages={{
-              next: "Suivant",
-              previous: "Précédent",
-              today: "Aujourd'hui",
-              month: "Mois"
+          Étape 2 : Choisissez une date
+        </h2>
+
+        {/* Navigation mois */}
+        <div style={{ 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "space-between",
+          marginBottom: "1rem"
+        }}>
+          <button
+            onClick={() => changerMois(-1)}
+            style={{
+              padding: "0.5rem",
+              background: "white",
+              border: "2px solid #2c5aa0",
+              borderRadius: "8px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
             }}
-            dayPropGetter={(date) => {
-              const dateString = moment(date).format('YYYY-MM-DD');
-              const selectedDateString = selectedDate ? moment(selectedDate).format('YYYY-MM-DD') : null;
-              
-              if (dateString === selectedDateString) {
-                return {
-                  className: 'rbc-selected',
-                  style: {
-                    backgroundColor: '#2c5aa0',
-                    color: 'white'
-                  }
-                };
-              }
-              return {};
+          >
+            <ChevronLeft style={{ color: "#2c5aa0" }} size={24} />
+          </button>
+          
+          <h3 style={{ 
+            margin: 0,
+            color: "#2c5aa0",
+            fontSize: "1.1rem",
+            fontWeight: "bold"
+          }}>
+            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+          </h3>
+          
+          <button
+            onClick={() => changerMois(1)}
+            style={{
+              padding: "0.5rem",
+              background: "white",
+              border: "2px solid #2c5aa0",
+              borderRadius: "8px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
             }}
-            eventPropGetter={(event) => ({
-              style: {
-                backgroundColor: '#2c5aa0',
-                borderRadius: '5px',
-                opacity: 0.8,
-                color: 'white',
-                border: '0px',
-                display: 'block'
-              }
-            })}
-          />
+          >
+            <ChevronRight style={{ color: "#2c5aa0" }} size={24} />
+          </button>
+        </div>
+
+        {/* Jours semaine */}
+        <div style={{ 
+          display: "grid", 
+          gridTemplateColumns: "repeat(7, 1fr)", 
+          gap: "0.25rem",
+          marginBottom: "0.5rem"
+        }}>
+          {dayNames.map(day => (
+            <div key={day} style={{ 
+              textAlign: "center",
+              fontSize: "0.75rem",
+              fontWeight: "600",
+              color: "#666",
+              padding: "0.5rem 0"
+            }}>
+              {day}
+            </div>
+          ))}
+        </div>
+
+        {/* Grille jours */}
+        <div style={{ 
+          display: "grid", 
+          gridTemplateColumns: "repeat(7, 1fr)", 
+          gap: "0.25rem"
+        }}>
+          {days.map((date, index) => {
+            if (!date) {
+              return <div key={`empty-${index}`} />;
+            }
+
+            const isSelected = selectedDate && date.toDateString() === selectedDate.toDateString();
+            const isTodayDate = isToday(date);
+            const isPast = isPastDate(date);
+
+            return (
+              <button
+                key={date.toISOString()}
+                onClick={() => handleDateSelect(date)}
+                disabled={isPast}
+                style={{
+                  aspectRatio: "1",
+                  borderRadius: "8px",
+                  fontSize: "0.9rem",
+                  fontWeight: "500",
+                  border: isSelected 
+                    ? "2px solid #2c5aa0"
+                    : isTodayDate 
+                    ? "2px solid #2c5aa0"
+                    : "1px solid #e0e0e0",
+                  background: isSelected 
+                    ? "#2c5aa0" 
+                    : isPast 
+                    ? "#f5f5f5"
+                    : "white",
+                  color: isSelected 
+                    ? "white" 
+                    : isPast 
+                    ? "#ccc"
+                    : "#333",
+                  cursor: isPast ? "not-allowed" : "pointer",
+                  transition: "all 0.2s"
+                }}
+              >
+                {date.getDate()}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* ÉTAPE 3 : SELECTION HEURE */}
+      {/* ÉTAPE 3 : HORAIRES */}
       {selectedDate && (
         <div style={{ 
-          marginTop: "2rem", 
-          padding: "2rem", 
-          background: "#f9f9f9", 
-          borderRadius: "12px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+          marginBottom: "1.5rem",
+          padding: "1rem",
+          background: "white",
+          border: "2px solid #2c5aa0",
+          borderRadius: "12px"
         }}>
-          <h2 style={{ color: "#2c5aa0" }}>Étape 3 : Choisissez une heure</h2>
-          <p style={{ marginBottom: "1rem", color: "#555", fontSize: "1.1rem" }}>
-            Date sélectionnée : <strong>{moment(selectedDate).format("dddd DD MMMM YYYY")}</strong>
+          <h2 style={{ 
+            color: "#2c5aa0",
+            marginBottom: "0.5rem",
+            fontSize: "1.2rem"
+          }}>
+            Étape 3 : Choisissez une heure
+          </h2>
+          <p style={{ 
+            marginBottom: "1rem",
+            color: "#666",
+            fontSize: "0.9rem"
+          }}>
+            {moment(selectedDate).format("dddd DD MMMM YYYY")}
           </p>
-
-        
-             
-          
 
           {horairesDisponibles.length === 0 ? (
             <div style={{ 
-              padding: "2rem", 
-              textAlign: "center", 
-              background: "#f8d7da",
-              color: "#721c24",
+              padding: "1rem",
+              textAlign: "center",
+              background: "#ffe0e0",
+              color: "#c00",
               borderRadius: "8px",
-              fontSize: "1.1rem"
+              fontSize: "0.9rem"
             }}>
-              Tous les créneaux sont réservés pour cette date. Veuillez choisir un autre jour.
+              Tous les créneaux sont réservés
             </div>
           ) : (
             <div style={{ 
-              display: "grid", 
-              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", 
-              gap: "1rem",
-              marginTop: "1.5rem"
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: "0.75rem"
             }}>
               {horairesDisponibles.map((heure) => (
                 <button
                   key={heure}
                   onClick={() => handleTimeSelect(heure)}
                   style={{
-                    padding: "1rem",
-                    border: selectedTime === heure ? "2px solid #2c5aa0" : "1px solid #ddd",
-                    background: selectedTime === heure ? "#2c5aa0" : "white",
-                    color: selectedTime === heure ? "white" : "#333",
+                    padding: "0.75rem",
+                    border: selectedTime === heure 
+                      ? "2px solid #2c5aa0"
+                      : "2px solid #e0e0e0",
+                    background: selectedTime === heure 
+                      ? "#2c5aa0"
+                      : "white",
+                    color: selectedTime === heure 
+                      ? "white"
+                      : "#333",
                     borderRadius: "8px",
-                    fontSize: "1.1rem",
-                    fontWeight: "bold",
+                    fontSize: "1rem",
+                    fontWeight: "600",
                     cursor: "pointer",
-                    transition: "all 0.3s",
-                    transform: selectedTime === heure ? "scale(1.05)" : "scale(1)"
+                    transition: "all 0.2s"
                   }}
                 >
                   {heure}
@@ -548,296 +563,319 @@ function reserverArgent() {
         </div>
       )}
 
-      {/* FORMULAIRE - identique au code précédent... */}
+      {/* ÉTAPE 4 : FORMULAIRE */}
       {showForm && selectedTime && (
         <div style={{ 
-          marginTop: "2rem", 
-          padding: "2rem", 
-          background: "white", 
-          borderRadius: "12px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+          marginBottom: "1.5rem",
+          padding: "1rem",
+          background: "white",
+          border: "2px solid #2c5aa0",
+          borderRadius: "12px"
         }}>
-          <h2 style={{ color: "#2c5aa0", marginBottom: "1.5rem" }}>
-                     Étape 4 : Vos informations
-                   </h2>
-         
-                   <div style={{ 
-                     padding: "1rem", 
-                     background: "#e3f2fd", 
-                     borderRadius: "8px",
-                     marginBottom: "2rem",
-                     textAlign: "center"
-                   }}>
-                     <strong>Récapitulatif :</strong> {moment(selectedDate).format("DD/MM/YYYY")} à {selectedTime}
-                     {selectedOptions.length > 0 && (
-                       <div style={{ marginTop: "0.5rem", fontSize: "0.95rem" }}>
-                         Options : {selectedOptions.map(optionId => {
-                           const option = optionsDisponibles.find(opt => opt.id === optionId);
-                           return option.nom;
-                         }).join(', ')}
-                       </div>
-                     )}
-                   </div>
-         
-                   <form>
-                     <div style={{ 
-                       display: "grid", 
-                       gridTemplateColumns: "1fr 1fr", 
-                       gap: "1rem",
-                       marginBottom: "1rem"
-                     }}>
-                       <div>
-                         <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                           Nom *
-                         </label>
-                         <input
-                           type="text"
-                           name="nom"
-                           value={formData.nom}
-                           onChange={handleInputChange}
-                           required
-                           style={{
-                             width: "100%",
-                             padding: "12px",
-                             border: "1px solid #ddd",
-                             borderRadius: "8px",
-                             fontSize: "1rem",
-                             transition: "border 0.3s"
-                           }}
-                         />
-                       </div>
-         
-                       <div>
-                         <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                           Prénom *
-                         </label>
-                         <input
-                           type="text"
-                           name="prenom"
-                           value={formData.prenom}
-                           onChange={handleInputChange}
-                           required
-                           style={{
-                             width: "100%",
-                             padding: "12px",
-                             border: "1px solid #ddd",
-                             borderRadius: "8px",
-                             fontSize: "1rem",
-                             transition: "border 0.3s"
-                           }}
-                         />
-                       </div>
-                     </div>
-         
-                     <div style={{ marginBottom: "1rem" }}>
-                       <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                         Email *
-                       </label>
-                       <input
-                         type="email"
-                         name="email"
-                         value={formData.email}
-                         onChange={handleInputChange}
-                         required
-                         style={{
-                           width: "100%",
-                           padding: "12px",
-                           border: "1px solid #ddd",
-                           borderRadius: "8px",
-                           fontSize: "1rem",
-                           transition: "border 0.3s"
-                         }}
-                       />
-                     </div>
-         
-                     <div style={{ marginBottom: "2rem" }}>
-                       <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
-                         Téléphone *
-                       </label>
-                       <input
-                         type="tel"
-                         name="telephone"
-                         value={formData.telephone}
-                         onChange={handleInputChange}
-                         placeholder="06 12 34 56 78"
-                         required
-                         style={{
-                           width: "100%",
-                           padding: "12px",
-                           border: "1px solid #ddd",
-                           borderRadius: "8px",
-                           fontSize: "1rem",
-                           transition: "border 0.3s"
-                         }}
-                       />
-                     </div>
-         
-                     {/* CHOIX DU MODE DE PAIEMENT */}
-                     <div style={{ 
-                       marginBottom: "2rem",
-                       padding: "1.5rem",
-                       background: "#f8f9fa",
-                       borderRadius: "12px",
-                       border: "2px solid #dee2e6"
-                     }}>
-                       <h3 style={{ color: "#2c5aa0", marginTop: 0, marginBottom: "1.5rem" }}>
-                         💳 Mode de paiement
-                       </h3>
-                       
-                       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                         <div
-                           onClick={() => setPaymentMethod("stripe")}
-                           style={{
-                             padding: "1.5rem",
-                             border: paymentMethod === "stripe" ? "3px solid #635bff" : "2px solid #ddd",
-                             background: paymentMethod === "stripe" ? "#f7f6ff" : "white",
-                             borderRadius: "10px",
-                             cursor: "pointer",
-                             transition: "all 0.3s",
-                             transform: paymentMethod === "stripe" ? "scale(1.02)" : "scale(1)"
-                           }}
-                         >
-                           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                             <input
-                               type="radio"
-                               name="payment"
-                               checked={paymentMethod === "stripe"}
-                               onChange={() => setPaymentMethod("stripe")}
-                               style={{ width: "20px", height: "20px", cursor: "pointer" }}
-                             />
-                             <div>
-                               <div style={{ fontWeight: "bold", fontSize: "1.1rem", marginBottom: "0.5rem" }}>
-                                 💳 Paiement en ligne par carte
-                               </div>
-                               <div style={{ color: "#666", fontSize: "0.95rem" }}>
-                                 Paiement sécurisé via Stripe • Confirmation immédiate
-                               </div>
-                             </div>
-                           </div>
-                         </div>
-         
-                         <div
-                           onClick={() => setPaymentMethod("cash")}
-                           style={{
-                             padding: "1.5rem",
-                             border: paymentMethod === "cash" ? "3px solid #28a745" : "2px solid #ddd",
-                             background: paymentMethod === "cash" ? "#f1f9f3" : "white",
-                             borderRadius: "10px",
-                             cursor: "pointer",
-                             transition: "all 0.3s",
-                             transform: paymentMethod === "cash" ? "scale(1.02)" : "scale(1)"
-                           }}
-                         >
-                           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                             <input
-                               type="radio"
-                               name="payment"
-                               checked={paymentMethod === "cash"}
-                               onChange={() => setPaymentMethod("cash")}
-                               style={{ width: "20px", height: "20px", cursor: "pointer" }}
-                             />
-                             <div>
-                               <div style={{ fontWeight: "bold", fontSize: "1.1rem", marginBottom: "0.5rem" }}>
-                                 💵 Paiement sur place
-                               </div>
-                               <div style={{ color: "#666", fontSize: "0.95rem" }}>
-                                 Espèces ou carte le jour du rendez-vous • Total : {calculerPrixTotal()}€
-                               </div>
-                             </div>
-                           </div>
-                         </div>
-                       </div>
-                     </div>
-         
-                     {/* BOUTONS DE PAIEMENT */}
-                     {paymentMethod === "stripe" && (
-                       <button
-                         onClick={handleStripePayment}
-                         disabled={loading}
-                         style={{
-                           width: "100%",
-                           padding: "1.5rem",
-                           background: loading ? "#6c757d" : "#635bff",
-                           color: "white",
-                           border: "none",
-                           borderRadius: "12px",
-                           fontSize: "1.2rem",
-                           fontWeight: "bold",
-                           cursor: loading ? "not-allowed" : "pointer",
-                           transition: "all 0.3s",
-                           transform: loading ? "scale(1)" : "scale(1)",
-                         }}
-                         onMouseOver={(e) => !loading && (e.target.style.transform = "scale(1.02)")}
-                         onMouseOut={(e) => !loading && (e.target.style.transform = "scale(1)")}
-                       >
-                         {loading ? "Redirection..." : `💳 Payer ${calculerPrixTotal()}€ avec Stripe`}
-                       </button>
-                     )}
-         
-                     {paymentMethod === "cash" && (
-                       <button
-                         onClick={handleCashPayment}
-                         disabled={loading}
-                         style={{
-                           width: "100%",
-                           padding: "1.5rem",
-                           background: loading ? "#6c757d" : "#28a745",
-                           color: "white",
-                           border: "none",
-                           borderRadius: "12px",
-                           fontSize: "1.2rem",
-                           fontWeight: "bold",
-                           cursor: loading ? "not-allowed" : "pointer",
-                           transition: "all 0.3s"
-                         }}
-                         onMouseOver={(e) => !loading && (e.target.style.transform = "scale(1.02)")}
-                         onMouseOut={(e) => !loading && (e.target.style.transform = "scale(1)")}
-                       >
-                         {loading ? "Réservation en cours..." : `✅ Confirmer la réservation (${calculerPrixTotal()}€ sur place)`}
-                       </button>
-                     )}
-         
-                     {!paymentMethod && (
-                       <div style={{
-                         width: "100%",
-                         padding: "1.5rem",
-                         background: "#e9ecef",
-                         color: "#6c757d",
-                         border: "2px dashed #adb5bd",
-                         borderRadius: "12px",
-                         fontSize: "1.1rem",
-                         fontWeight: "bold",
-                         textAlign: "center"
-                       }}>
-                         ⬆️ Veuillez choisir un mode de paiement
-                       </div>
-                     )}
-                   </form>
-         
-                   <p style={{ 
-                     marginTop: "1rem", 
-                     textAlign: "center", 
-                     color: "#666",
-                     fontSize: "0.9rem"
-                   }}>
-                     🔒 Vos données sont sécurisées et ne seront pas partagées
-                   </p>
-                 </div>
-               )}
+          <h2 style={{ 
+            color: "#2c5aa0",
+            marginBottom: "1rem",
+            fontSize: "1.2rem"
+          }}>
+            Étape 4 : Vos informations
+          </h2>
 
-      <div style={{ marginTop: "2rem", textAlign: "center" }}>
+          <div style={{ 
+            padding: "0.75rem",
+            background: "#e3f2fd",
+            borderRadius: "8px",
+            marginBottom: "1rem",
+            fontSize: "0.9rem"
+          }}>
+            <strong>Récapitulatif :</strong><br/>
+            {moment(selectedDate).format("DD/MM/YYYY")} à {selectedTime}
+            {selectedOptions.length > 0 && (
+              <div style={{ marginTop: "0.25rem" }}>
+                Options : {selectedOptions.map(optionId => {
+                  const option = optionsDisponibles.find(opt => opt.id === optionId);
+                  return option.nom;
+                }).join(', ')}
+              </div>
+            )}
+          </div>
+
+          <form>
+            <div style={{ marginBottom: "0.75rem" }}>
+              <label style={{ 
+                display: "block",
+                marginBottom: "0.25rem",
+                fontSize: "0.9rem",
+                fontWeight: "500"
+              }}>
+                Nom *
+              </label>
+              <input
+                type="text"
+                name="nom"
+                value={formData.nom}
+                onChange={handleInputChange}
+                required
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  border: "2px solid #e0e0e0",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: "0.75rem" }}>
+              <label style={{ 
+                display: "block",
+                marginBottom: "0.25rem",
+                fontSize: "0.9rem",
+                fontWeight: "500"
+              }}>
+                Prénom *
+              </label>
+              <input
+                type="text"
+                name="prenom"
+                value={formData.prenom}
+                onChange={handleInputChange}
+                required
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  border: "2px solid #e0e0e0",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: "0.75rem" }}>
+              <label style={{ 
+                display: "block",
+                marginBottom: "0.25rem",
+                fontSize: "0.9rem",
+                fontWeight: "500"
+              }}>
+                Email *
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  border: "2px solid #e0e0e0",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ 
+                display: "block",
+                marginBottom: "0.25rem",
+                fontSize: "0.9rem",
+                fontWeight: "500"
+              }}>
+                Téléphone *
+              </label>
+              <input
+                type="tel"
+                name="telephone"
+                value={formData.telephone}
+                onChange={handleInputChange}
+                placeholder="06 12 34 56 78"
+                required
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  border: "2px solid #e0e0e0",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+            
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ 
+                display: "block",
+                marginBottom: "0.25rem",
+                fontSize: "0.9rem",
+                fontWeight: "500"
+              }}>
+                Adresse 
+                </label>
+              <input
+                type="text"
+                name="adresse"
+                value={formData.adresse}
+                onChange={handleInputChange}
+                placeholder="Optionnel"
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  border: "2px solid #e0e0e0",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+            {/* MODE PAIEMENT */}
+            <div style={{ 
+              marginBottom: "1rem",
+              padding: "1rem",
+              background: "#f8f9fa",
+              borderRadius: "8px",
+              border: "2px solid #e0e0e0"
+            }}>
+              <h3 style={{ 
+                margin: "0 0 0.75rem 0",
+                fontSize: "1rem",
+                color: "#2c5aa0"
+              }}>
+                💳 Mode de paiement
+              </h3>
+              
+              <div
+                onClick={() => setPaymentMethod("stripe")}
+                style={{
+                  padding: "0.75rem",
+                  border: paymentMethod === "stripe" 
+                    ? "2px solid #635bff"
+                    : "2px solid #ddd",
+                  background: paymentMethod === "stripe" 
+                    ? "#f7f6ff"
+                    : "white",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  marginBottom: "0.75rem",
+                  fontSize: "0.9rem"
+                }}
+              >
+                <input
+                  type="radio"
+                  checked={paymentMethod === "stripe"}
+                  onChange={() => {}}
+                  style={{ marginRight: "0.5rem" }}
+                />
+                <strong>💳 Carte bancaire</strong>
+                <div style={{ fontSize: "0.8rem", color: "#666", marginLeft: "1.5rem" }}>
+                  Paiement sécurisé Stripe
+                </div>
+              </div>
+
+              <div
+                onClick={() => setPaymentMethod("cash")}
+                style={{
+                  padding: "0.75rem",
+                  border: paymentMethod === "cash" 
+                    ? "2px solid #28a745"
+                    : "2px solid #ddd",
+                  background: paymentMethod === "cash" 
+                    ? "#f1f9f3"
+                    : "white",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontSize: "0.9rem"
+                }}
+              >
+                <input
+                  type="radio"
+                  checked={paymentMethod === "cash"}
+                  onChange={() => {}}
+                  style={{ marginRight: "0.5rem" }}
+                />
+                <strong>💵 Sur place</strong>
+                <div style={{ fontSize: "0.8rem", color: "#666", marginLeft: "1.5rem" }}>
+                  Total : {calculerPrixTotal()}€
+                </div>
+              </div>
+            </div>
+
+            {/* BOUTONS */}
+            {paymentMethod === "stripe" && (
+              <button
+                onClick={handleStripePayment}
+                disabled={loading}
+                style={{
+                  width: "100%",
+                  padding: "1rem",
+                  background: loading ? "#6c757d" : "#635bff",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  cursor: loading ? "not-allowed" : "pointer"
+                }}
+              >
+                {loading ? "Redirection..." : `💳 Payer ${calculerPrixTotal()}€`}
+              </button>
+            )}
+
+            {paymentMethod === "cash" && (
+              <button
+                onClick={handleCashPayment}
+                disabled={loading}
+                style={{
+                  width: "100%",
+                  padding: "1rem",
+                  background: loading ? "#6c757d" : "#28a745",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  cursor: loading ? "not-allowed" : "pointer"
+                }}
+              >
+                {loading ? "Réservation..." : `✅ Confirmer (${calculerPrixTotal()}€)`}
+              </button>
+            )}
+
+            {!paymentMethod && (
+              <div style={{
+                width: "100%",
+                padding: "1rem",
+                background: "#e9ecef",
+                color: "#6c757d",
+                border: "2px dashed #adb5bd",
+                borderRadius: "8px",
+                fontSize: "0.9rem",
+                textAlign: "center"
+              }}>
+                ⬆️ Choisissez un mode de paiement
+              </div>
+            )}
+          </form>
+        </div>
+      )}
+
+      {/* BOUTON RETOUR */}
+      <div style={{ textAlign: "center", marginTop: "2rem" }}>
         <Link 
           to="/" 
           style={{
-            padding: "1rem 2rem",
+            padding: "0.75rem 1.5rem",
             background: "#6c757d",
             color: "white",
             textDecoration: "none",
             borderRadius: "8px",
-            display: "inline-block"
+            display: "inline-block",
+            fontSize: "0.9rem"
           }}
         >
-          Retour
+          ← Retour
         </Link>
       </div>
     </div>

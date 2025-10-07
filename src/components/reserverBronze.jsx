@@ -33,17 +33,17 @@ function reserverBronze() {
     nom: "",
     prenom: "",
     email: "",
-    telephone: ""
+    telephone: "",
+    adresse: ""
   });
 
   const [selectedOptions, setSelectedOptions] = useState([]);
 
   const optionsDisponibles = [
-    { id: "interieur", nom: "Shampouineuses siège, tapis et moquettes", prix: 25 },
-    { id: "jantes", nom: "Lavage extérieur avec shampoing", prix: 20 },
-    { id: "polish", nom: "Lavage moteur", prix: 15 },
-    { id: "cire", nom: "Elimination poils d'animaux", prix: 15 },
-    { id: "vitres", nom: "Véhicules très sale (ex: vomis..)", prix: 15 },
+    { id: "interieur", nom: "🧼 Shampouineuse sièges/tapis/moquettes", prix: 25 },
+    { id: "jantes", nom: "🐾 Élimination poils d’animaux", prix: 15 },
+    { id: "polish", nom: "🚗 Lavage extérieur", prix: 20 },
+    { id: "cire", nom: "⚙️ Lavage moteur ", prix: 15 },
   ];
 
   // Navigation mois
@@ -165,6 +165,7 @@ function reserverBronze() {
         prenom: formData.prenom,
         email: formData.email,
         telephone: formData.telephone,
+        adresse: formData.adresse,
         date: moment(selectedDate).format('DD/MM/YYYY'),
         dateISO: selectedDate.toISOString(),
         heure: selectedTime,
@@ -701,7 +702,32 @@ function reserverBronze() {
                 }}
               />
             </div>
-
+            
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ 
+                display: "block",
+                marginBottom: "0.25rem",
+                fontSize: "0.9rem",
+                fontWeight: "500"
+              }}>
+                Adresse 
+                </label>
+              <input
+                type="text"
+                name="adresse"
+                value={formData.adresse}
+                onChange={handleInputChange}
+                placeholder="Optionnel"
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  border: "2px solid #e0e0e0",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
             {/* MODE PAIEMENT */}
             <div style={{ 
               marginBottom: "1rem",

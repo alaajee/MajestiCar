@@ -35,20 +35,7 @@ function ReservationSuccess() {
         }
 
         if (!paymentType) {
-          throw new Error('Paramètre "payment" manquant dans l’URL');
-        }
-
-        const storageKey = `reservation_processed_${reservationId || 'cash'}`;
-        if (sessionStorage.getItem(storageKey)) {
-          console.log('Réservation déjà traitée.');
-          const savedData = sessionStorage.getItem(`reservation_data_${reservationId || 'cash'}`);
-          if (savedData) {
-            const data = JSON.parse(savedData);
-            setReservationInfo(data);
-            setIsCashPayment(data.paymentMethod === 'cash');
-            setStatus('success');
-          }
-          return;
+          throw new Error('Paramètre "payment" manquant dans lURL');
         }
 
         let data;
@@ -57,6 +44,20 @@ function ReservationSuccess() {
         // ======== CAS 1 : PAIEMENT STRIPE ========
         if (paymentType === 'stripe') {
           console.log('💳 Mode Stripe détecté');
+
+          // Vérification anti-doublon pour Stripe
+          const storageKey = `reservation_processed_${reservationId}`;
+          if (sessionStorage.getItem(storageKey)) {
+            console.log('Réservation Stripe déjà traitée.');
+            const savedData = sessionStorage.getItem(`reservation_data_${reservationId}`);
+            if (savedData) {
+              const data = JSON.parse(savedData);
+              setReservationInfo(data);
+              setIsCashPayment(false);
+              setStatus('success');
+            }
+            return;
+          }
 
           if (!reservationId) {
             const clientEmail = sessionStorage.getItem('stripe_pending_email');
@@ -98,6 +99,7 @@ function ReservationSuccess() {
             from_name: `${data.prenom} ${data.nom}`,
             from_email: data.email,
             phone: data.telephone,
+            address: data.adresse ,
             date: data.date,
             time: data.heure,
             service: `Formule ${data.formule} - 50€`,
@@ -113,31 +115,13 @@ function ReservationSuccess() {
               templateParams,
               'PEOGgjS79RXoYneNz'
             );
-            console.log('✅ Email client envoyé');
+            console.log('✅ Email de confirmation envoyé');
           } catch (err) {
-            console.error('❌ Erreur email client:', err);
-          }
-
-          // ENVOI EMAIL ADMIN (template séparé)
-          try {
-            const templateParamsAdmin = {
-              ...templateParams,
-              to_email: "alaajenn7@gmail.com",
-              admin_message: `Nouvelle réservation Stripe : ${data.prenom} ${data.nom}, ${data.date} à ${data.heure}`,
-            };
-
-            await emailjs.send(
-              'service_dfuagfb',
-              'template_admin', // ⚠️ crée ce template dans EmailJS
-              templateParamsAdmin,
-              'PEOGgjS79RXoYneNz'
-            );
-            console.log('✅ Email admin envoyé');
-          } catch (err) {
-            console.error('❌ Erreur email admin:', err);
+            console.error('❌ Erreur envoi email:', err);
           }
 
           sessionStorage.removeItem('stripe_pending_reservation');
+          sessionStorage.removeItem('stripe_pending_email');
         }
 
         // ======== CAS 2 : PAIEMENT CASH ========
@@ -147,8 +131,25 @@ function ReservationSuccess() {
           if (!dataParam) throw new Error('Paramètre "data" manquant');
           data = JSON.parse(decodeURIComponent(dataParam));
 
+          // NOUVEAU : Génération d'un ID unique pour chaque réservation cash
+          const cashReservationId = `cash_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          const storageKey = `reservation_processed_${cashReservationId}`;
+
+          // Vérification si cette réservation spécifique a déjà été traitée
+          if (sessionStorage.getItem(storageKey)) {
+            console.log('Réservation cash déjà traitée.');
+            const savedData = sessionStorage.getItem(`reservation_data_${cashReservationId}`);
+            if (savedData) {
+              const savedReservation = JSON.parse(savedData);
+              setReservationInfo(savedReservation);
+              setIsCashPayment(true);
+              setStatus('success');
+            }
+            return;
+          }
+
           sessionStorage.setItem(storageKey, 'true');
-          sessionStorage.setItem(`reservation_data_cash`, JSON.stringify(data));
+          sessionStorage.setItem(`reservation_data_${cashReservationId}`, JSON.stringify(data));
 
           await ajouterReservation(new Date(data.dateISO), data.heure, data.formule);
 
@@ -156,6 +157,7 @@ function ReservationSuccess() {
             from_name: `${data.prenom} ${data.nom}`,
             from_email: data.email,
             phone: data.telephone,
+            address: data.adresse,
             date: data.date,
             time: data.heure,
             service: `Formule ${data.formule} - 50€`,
@@ -368,6 +370,12 @@ function ReservationSuccess() {
               <strong style={{ color: '#2c5aa0' }}>Téléphone :</strong>
               <p style={{ margin: '0.5rem 0', color: '#333' }}>{reservationInfo.telephone}</p>
             </div>
+            {reservationInfo.adresse && (
+              <div style={{ marginBottom: '1rem' }}>
+                <strong style={{ color: '#2c5aa0' }}>Adresse :</strong>
+                <p style={{ margin: '0.5rem 0', color: '#333' }}>{reservationInfo.adresse}</p>
+              </div>
+            )}
             <div style={{ marginBottom: '1rem' }}>
               <strong style={{ color: '#2c5aa0' }}>Date et heure :</strong>
               <p style={{ margin: '0.5rem 0', color: '#333', fontSize: '1.1rem' }}>
