@@ -719,7 +719,7 @@ function reserverArgent() {
                 name="adresse"
                 value={formData.adresse}
                 onChange={handleInputChange}
-                placeholder="Optionnel"
+                placeholder="9 xx Rue Exemple, 38000 Grenoble"
                 style={{
                   width: "100%",
                   padding: "0.75rem",

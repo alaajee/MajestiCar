@@ -36,7 +36,6 @@ function App() {
     picture1,
     picture2,
     picture3,
-    picture4,
   ];
 
   const carouselVideos = [
@@ -51,16 +50,18 @@ function App() {
   ];
 
   // Fonction pour passer à l'image suivante
+  // Fonction pour passer à l'image suivante
+// Fonction pour passer à l'image suivante
   const nextImage = () => {
     setCurrentImageIndex((prevIndex) => 
-      prevIndex === carouselImages.length - 1 ? 0 : prevIndex + 1
+      prevIndex === allMedia.length - 1 ? 0 : prevIndex + 1
     );
   };
-  
+
   // Fonction pour passer à l'image précédente
   const prevImage = () => {
     setCurrentImageIndex((prevIndex) => 
-      prevIndex === 0 ? carouselImages.length - 1 : prevIndex - 1
+      prevIndex === 0 ? allMedia.length - 1 : prevIndex - 1
     );
   };
 
@@ -130,22 +131,18 @@ function App() {
       <div className="A_propos" ref={AproposRef}>
       <h2>À propos de Majesti'Car</h2>
       <p>
-        Bienvenue chez Majesti'Car, votre partenaire du nettoyage automobile premium 💎.
-        Nous avons conçu un utilitaire transformé en station de lavage mobile 🔋💧, 100% autonome en électricité et en eau, pour vous offrir un service rapide, pratique et haut de gamme. <br/>
+        Majesti’Car, votre station de lavage automobile mobile premium 🚐✨
+        Autonome en électricité et en eau, nous venons directement à vous pour redonner à votre véhicule toute sa brillance. 💧 <br/>
 
-        📍 Où vous voulez, quand vous voulez :<br />
-        - À domicile 🏡<br />
-        - Sur votre lieu de travail 🏢<br />
-        - Ou à l'adresse de votre choix 📌<br /><br />
+        📍 Nos services :<br />
+        ✅ Detailing complet intérieur – nettoyage en profondeur des tissus, soin des surfaces, finitions haut de gamme<br />
+        ✅ Lavage extérieur avec shampoing – carrosserie éclatante, jantes impeccables, rendu professionnel.<br />
 
-        ✅ Nos services :<br />
-        - Nettoyage extérieur 🚿🚗<br />
-        - Nettoyage intérieur 🧽🪣<br />
-        - Finitions soignées pour un rendu comme neuf ✨<br /><br />
 
-        Avec Majesti'Car, plus besoin de vous déplacer : 👉 Nous venons à vous et nous redonnons tout son éclat à votre véhicule.<br /><br />
+        Un service pratique, écologique et 100 % mobile.
+        Majesticar, la qualité du lavage professionnel, directement chez vous. 🚗💨
 
-        Confort, qualité et exigence sont au cœur de notre savoir-faire 💯.
+       
       </p>
     </div>
 
@@ -215,7 +212,7 @@ function App() {
         {/* Section Galerie Photos */}
         <div className="gallery-section">
           <h1 className="gallery-title">Notre Galerie</h1>
-          <p className="gallery-subtitle">Découvrez nos réalisations</p>
+          <p className="gallery-subtitle">Notre qualité à votre service</p>
           
           <div className="gallery-carousel">
             <button className="gallery-arrow gallery-arrow-left" onClick={prevImage}>
@@ -261,7 +258,7 @@ function App() {
           <div className="footer-contact">
             <h2>Contactez-nous</h2>
             <p>
-              <strong>Téléphone :</strong> <a href="tel:+212612345678" className="footer-phone">+212 6 12 34 56 78</a>
+              <strong>Téléphone :</strong> <a href="tel:+336 74 14 07 46" className="footer-phone">+212 6 12 34 56 78</a>
             </p>
             <p>
               <strong>Email :</strong> <a href="mailto:alaejennine33@gmail.com" className="footer-email">alaejennine33@gmail.com</a>
