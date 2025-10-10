@@ -180,74 +180,49 @@ html, body {
 
 /* Slogan sur l'image */
 .image-slogan {
-  position: relative; /* Changé de absolute */
-  display: inline-block; /* Pour s'adapter au texte */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 90%;
   font-size: 3rem;
   font-weight: 900;
   text-align: center;
   line-height: 1.2;
-  letter-spacing: 3px;
-  
-  /* Fond blanc */
-  background: white;
-  color: black;
-  
-  /* Pas de bordure */
-  border: none;
-  border-radius: 0px; /* Pas d'arrondi */
-  
-  /* Ombre noire décalée */
-  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.8);
-  
-  /* Écriture penchée */
-  font-style: italic;
-  padding: 10px 30px;
-  text-transform: uppercase;
-  
-  /* Légère inclinaison du bandeau */
-  transform: rotate(-1deg);
-  
-  margin: 10px 0; /* Espacement entre les bandeaux */
-  
+  letter-spacing: 2px;
+  background: rgb(255, 255, 255);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.9))
+          drop-shadow(0px 0px 15px rgba(0, 198, 255, 0.4))
+          drop-shadow(0px 0px 25px rgba(59, 130, 246, 0.3));
+  animation: colorWave 5s ease-in-out infinite;
   z-index: 10;
 }
 
-/* Pour alterner l'inclinaison */
-.image-slogan:nth-child(odd) {
-  transform: rotate(1deg);
-}
-
-.image-slogan:nth-child(even) {
-  transform: rotate(1deg);
-}
 .Mes_services {
   position: absolute;
-  bottom: 200px;
+  bottom: 300px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
 }
 
 .Button_services {
-  background-color: white; /* Fond blanc au lieu de bleu */
-  color: black; /* Texte noir au lieu de blanc */
+  background-color: blue;
+  color: white;
   border: none;
-  padding: 15px 35px; /* Plus d'espace */
-  border-radius: 0px; /* Pas d'arrondi - rectangulaire */
+  padding: 12px 25px;
+  border-radius: 30px;
   font-size: 1.2rem;
   font-weight: bold;
   text-decoration: none;
   cursor: pointer;
-  font-style: italic; /* Texte en italique */
-  text-transform: uppercase; /* Majuscules */
-  letter-spacing: 2px; /* Espacement des lettres */
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-.Button_services:hover {
-  background-color: #f0f0f0; /* Légèrement gris au survol */
-  transform: scale(1.05); /* Légère augmentation au survol */
-}
 .A_propos {
   padding: 60px 20px;
   background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
@@ -370,7 +345,7 @@ html, body {
 }
 
 /* Media query pour petits écrans (mobile) */
-@media screen and (max-width: 1100px) {
+@media screen and (max-width: 1500px) {
   .top-banner {
     padding: 15px 10px;
   }
@@ -1013,22 +988,6 @@ html, body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-}
-.gallery-image-container video {
-  pointer-events: auto; /* Permet de cliquer sur les flèches */
-  object-fit: cover; /* Pour que la vidéo s'adapte comme une image */
-}
-
-.gallery-image-container video::-webkit-media-controls {
-  display: none !important;
-}
-
-.gallery-image-container video::-webkit-media-controls-enclosure {
-  display: none !important;
-}
-
-.gallery-image-container video::-webkit-media-controls-panel {
-  display: none !important;
 }
 .footer-section {
   background-color: #003366; /* bleu foncé */
