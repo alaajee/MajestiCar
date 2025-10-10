@@ -266,7 +266,7 @@ function App() {
               <strong>Téléphone :</strong> <a href="tel:+336 74 14 07 46" className="footer-phone">+212 6 12 34 56 78</a>
             </p>
             <p>
-              <strong>Email :</strong> <a href="mailto:alaejennine33@gmail.com" className="footer-email">alaejennine33@gmail.com</a>
+              <strong>Email :</strong> <a href="mailto:abedjaoui74380@gmail.com" className="footer-email">alaejennine33@gmail.com</a>
             </p>
           </div>
 
