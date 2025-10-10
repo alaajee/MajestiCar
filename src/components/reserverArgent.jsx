@@ -48,6 +48,7 @@ function reserverArgent() {
     { id: "trappe", nom: "⛽ Dégraissage trappe à carburant", prix: 10 },
   ];
 
+
   // Navigation mois
   const changerMois = (direction) => {
     const newDate = new Date(currentDate);
@@ -161,7 +162,6 @@ function reserverArgent() {
         : 'Aucune option supplémentaire';
   
       await ajouterReservation(selectedDate, selectedTime, 'Bronze');
-  
       const reservationData = {
         nom: formData.nom,
         prenom: formData.prenom,
@@ -171,7 +171,7 @@ function reserverArgent() {
         date: moment(selectedDate).format("DD/MM/YYYY"),
         dateISO: selectedDate.toISOString(),
         heure: selectedTime,
-        formule: "Argent",  
+        formule: "Bronze",
         options: selectedOptions,
         optionsTexte: optionsTexte,
         prixTotal: prixTotal,
@@ -179,6 +179,7 @@ function reserverArgent() {
         paymentMethod: "stripe",
         createdAt: new Date().toISOString()
       };
+  
       navigate(`/reservation-success?data=${encodeURIComponent(JSON.stringify(reservationData))}&payment=cash`);
   
     } catch (error) {
@@ -227,6 +228,7 @@ function reserverArgent() {
         prenom: formData.prenom,
         email: formData.email,
         telephone: formData.telephone,
+        adresse: formData.adresse,  // ✅ AJOUTÉ ICI
         date: moment(selectedDate).format("DD/MM/YYYY"),
         dateISO: selectedDate.toISOString(),
         heure: selectedTime,
@@ -284,7 +286,7 @@ function reserverArgent() {
           fontSize: "1.2rem",
           fontWeight: "bold"
         }}>
-          80€
+          90€
         </p>
       </div>
 
@@ -721,6 +723,7 @@ function reserverArgent() {
                 value={formData.adresse}
                 onChange={handleInputChange}
                 placeholder="9 xx Rue Exemple, 38000 Grenoble"
+                required
                 style={{
                   width: "100%",
                   padding: "0.75rem",
@@ -837,8 +840,7 @@ function reserverArgent() {
               </button>
             </>
           )}
-
-            {paymentMethod === "cash" && (
+                      {paymentMethod === "cash" && (
               <button
                 onClick={handleCashPayment}
                 disabled={loading}

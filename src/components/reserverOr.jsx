@@ -45,6 +45,8 @@ function reserverOr() {
     { id: "polish", nom: "🌬️ Traitement du système d’aération", prix: 15 },
   ];
 
+
+
   // Navigation mois
   const changerMois = (direction) => {
     const newDate = new Date(currentDate);
@@ -158,17 +160,16 @@ function reserverOr() {
         : 'Aucune option supplémentaire';
   
       await ajouterReservation(selectedDate, selectedTime, 'Bronze');
-  
       const reservationData = {
         nom: formData.nom,
         prenom: formData.prenom,
         email: formData.email,
         telephone: formData.telephone,
-        adresse: formData.adresse,  // ← AJOUTER CETTE LIGNE
+        adresse: formData.adresse,  
         date: moment(selectedDate).format("DD/MM/YYYY"),
         dateISO: selectedDate.toISOString(),
         heure: selectedTime,
-        formule: "Or",  // ← CORRIGER : "Or" au lieu de "Bronze"
+        formule: "Bronze",
         options: selectedOptions,
         optionsTexte: optionsTexte,
         prixTotal: prixTotal,
@@ -225,6 +226,7 @@ function reserverOr() {
         prenom: formData.prenom,
         email: formData.email,
         telephone: formData.telephone,
+        adresse: formData.adresse,  // ✅ AJOUTÉ ICI
         date: moment(selectedDate).format("DD/MM/YYYY"),
         dateISO: selectedDate.toISOString(),
         heure: selectedTime,
@@ -719,6 +721,7 @@ function reserverOr() {
                 value={formData.adresse}
                 onChange={handleInputChange}
                 placeholder="9 xx Rue Exemple, 38000 Grenoble"
+                required
                 style={{
                   width: "100%",
                   padding: "0.75rem",
@@ -835,8 +838,7 @@ function reserverOr() {
               </button>
             </>
           )}
-
-            {paymentMethod === "cash" && (
+                      {paymentMethod === "cash" && (
               <button
                 onClick={handleCashPayment}
                 disabled={loading}
