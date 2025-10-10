@@ -95,7 +95,7 @@ function ReservationSuccess() {
             from_name: `${data.prenom} ${data.nom}`,
             from_email: data.email,
             phone: data.telephone,
-            address: data.adresse || 'Non renseignée', // ✅ Valeur par défaut si vide
+            adresse: (data.adresse && data.adresse.trim()) ? data.adresse : 'Non renseignée',
             date: data.date,
             time: data.heure,
             service: `Formule ${data.formule} - 50€`,
@@ -159,7 +159,7 @@ function ReservationSuccess() {
             from_name: `${data.prenom} ${data.nom}`,
             from_email: data.email,
             phone: data.telephone,
-            address: data.adresse || 'Non renseignée', // ✅ Valeur par défaut
+            adresse: (data.adresse && data.adresse.trim()) ? data.adresse : 'Non renseignée',
             date: data.date,
             time: data.heure,
             service: `Formule ${data.formule} - 50€`,
@@ -188,7 +188,7 @@ function ReservationSuccess() {
               from_name: `${data.prenom} ${data.nom}`,
               from_email: data.email,
               phone: data.telephone,
-              address: data.adresse || 'Non renseignée', // ✅ Adresse aussi pour admin
+              adresse: (data.adresse && data.adresse.trim()) ? data.adresse : 'Non renseignée',
               date: data.date,
               time: data.heure,
               service: `Formule ${data.formule} - 50€`,
