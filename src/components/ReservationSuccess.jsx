@@ -12,16 +12,13 @@ moment.locale('fr');
 function ReservationSuccess() {
   const [searchParams] = useSearchParams();
   const { ajouterReservation } = useReservations();
-
   const [status, setStatus] = useState('loading');
   const [reservationInfo, setReservationInfo] = useState(null);
   const [isCashPayment, setIsCashPayment] = useState(false);
-
-  // Flag pour éviter les exécutions multiples
   const executedRef = useRef(false);
 
   useEffect(() => {
-    if (executedRef.current) return; 
+    if (executedRef.current) return;
     executedRef.current = true;
 
     const finaliserReservation = async () => {
@@ -44,8 +41,7 @@ function ReservationSuccess() {
         // ======== CAS 1 : PAIEMENT STRIPE ========
         if (paymentType === 'stripe') {
           console.log('💳 Mode Stripe détecté');
-
-          // Vérification anti-doublon pour Stripe
+          
           const storageKey = `reservation_processed_${reservationId}`;
           if (sessionStorage.getItem(storageKey)) {
             console.log('Réservation Stripe déjà traitée.');
@@ -90,23 +86,25 @@ function ReservationSuccess() {
 
           sessionStorage.setItem(storageKey, 'true');
           sessionStorage.setItem(`reservation_data_${reservationId}`, JSON.stringify(data));
-
+          
           await ajouterReservation(new Date(data.dateISO), data.heure, data.formule);
           await deleteDoc(docRef);
 
-          // ENVOI EMAIL CLIENT
+          // ENVOI EMAIL CLIENT - STRIPE
           const templateParams = {
             from_name: `${data.prenom} ${data.nom}`,
             from_email: data.email,
             phone: data.telephone,
-            address: data.adresse ,
+            address: data.adresse || 'Non renseignée', // ✅ Valeur par défaut si vide
             date: data.date,
             time: data.heure,
             service: `Formule ${data.formule} - 50€`,
-            options: data.optionsTexte,
+            options: data.optionsTexte || 'Aucune',
             prix_total: `${data.prixTotal}€`,
             payment_status: '✅ Payé via Stripe'
           };
+
+          console.log('📧 Envoi email Stripe avec données:', templateParams);
 
           try {
             await emailjs.send(
@@ -115,27 +113,30 @@ function ReservationSuccess() {
               templateParams,
               'PEOGgjS79RXoYneNz'
             );
-            console.log('✅ Email de confirmation envoyé');
+            console.log('✅ Email de confirmation Stripe envoyé');
           } catch (err) {
-            console.error('❌ Erreur envoi email:', err);
+            console.error('❌ Erreur envoi email Stripe:', err);
           }
 
           sessionStorage.removeItem('stripe_pending_reservation');
           sessionStorage.removeItem('stripe_pending_email');
         }
-
+        
         // ======== CAS 2 : PAIEMENT CASH ========
         else if (paymentType === 'cash') {
           console.log('💵 Mode Cash détecté');
           const dataParam = searchParams.get('data');
           if (!dataParam) throw new Error('Paramètre "data" manquant');
+          
           data = JSON.parse(decodeURIComponent(dataParam));
+          
+          // ✅ LOG POUR VÉRIFIER L'ADRESSE
+          console.log('🔍 Données cash reçues:', data);
+          console.log('🏠 Adresse dans data:', data.adresse);
 
-          // NOUVEAU : Génération d'un ID unique pour chaque réservation cash
           const cashReservationId = `cash_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
           const storageKey = `reservation_processed_${cashReservationId}`;
 
-          // Vérification si cette réservation spécifique a déjà été traitée
           if (sessionStorage.getItem(storageKey)) {
             console.log('Réservation cash déjà traitée.');
             const savedData = sessionStorage.getItem(`reservation_data_${cashReservationId}`);
@@ -150,21 +151,24 @@ function ReservationSuccess() {
 
           sessionStorage.setItem(storageKey, 'true');
           sessionStorage.setItem(`reservation_data_${cashReservationId}`, JSON.stringify(data));
-
+          
           await ajouterReservation(new Date(data.dateISO), data.heure, data.formule);
 
+          // EMAIL CLIENT - CASH
           const templateParams = {
             from_name: `${data.prenom} ${data.nom}`,
             from_email: data.email,
             phone: data.telephone,
-            address: data.adresse,
+            address: data.adresse || 'Non renseignée', // ✅ Valeur par défaut
             date: data.date,
             time: data.heure,
             service: `Formule ${data.formule} - 50€`,
-            options: data.optionsTexte,
+            options: data.optionsTexte || 'Aucune',
             prix_total: `${data.prixTotal}€`,
             payment_status: '💵 Paiement sur place'
           };
+
+          console.log('📧 Envoi email cash CLIENT avec données:', templateParams);
 
           try {
             await emailjs.send(
@@ -173,17 +177,29 @@ function ReservationSuccess() {
               templateParams,
               'PEOGgjS79RXoYneNz'
             );
-            console.log('✅ Email client envoyé');
+            console.log('✅ Email client cash envoyé');
           } catch (err) {
-            console.error('❌ Erreur email client:', err);
+            console.error('❌ Erreur email client cash:', err);
           }
 
+          // EMAIL ADMIN - CASH
           try {
             const templateParamsAdmin = {
-              ...templateParams,
+              from_name: `${data.prenom} ${data.nom}`,
+              from_email: data.email,
+              phone: data.telephone,
+              address: data.adresse || 'Non renseignée', // ✅ Adresse aussi pour admin
+              date: data.date,
+              time: data.heure,
+              service: `Formule ${data.formule} - 50€`,
+              options: data.optionsTexte || 'Aucune',
+              prix_total: `${data.prixTotal}€`,
+              payment_status: '💵 Paiement sur place',
               to_email: "alaajenn7@gmail.com",
-              admin_message: `Nouvelle réservation CASH : ${data.prenom} ${data.nom}, ${data.date} à ${data.heure}`,
+              admin_message: `Nouvelle réservation CASH : ${data.prenom} ${data.nom}, ${data.date} à ${data.heure}`
             };
+
+            console.log('📧 Envoi email cash ADMIN avec données:', templateParamsAdmin);
 
             await emailjs.send(
               'service_dfuagfb',
@@ -191,9 +207,9 @@ function ReservationSuccess() {
               templateParamsAdmin,
               'PEOGgjS79RXoYneNz'
             );
-            console.log('✅ Email admin envoyé');
+            console.log('✅ Email admin cash envoyé');
           } catch (err) {
-            console.error('❌ Erreur email admin:', err);
+            console.error('❌ Erreur email admin cash:', err);
           }
         }
 
@@ -209,7 +225,6 @@ function ReservationSuccess() {
 
     finaliserReservation();
   }, [searchParams, ajouterReservation]);
-
 
   // ========== ÉCRAN DE CHARGEMENT ==========
   if (status === 'loading') {
@@ -289,7 +304,7 @@ function ReservationSuccess() {
             border: '2px solid #ffc107'
           }}>
             <p style={{ margin: 0, color: '#856404', fontWeight: 'bold' }}>
-              Nous vous contacterons sous peu pour confirmer votre réservation. 
+              Nous vous contacterons sous peu pour confirmer votre réservation.
               Consultez la console (F12) pour plus de détails.
             </p>
           </div>
@@ -319,7 +334,7 @@ function ReservationSuccess() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: isCashPayment 
+      background: isCashPayment
         ? 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'
         : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       padding: '2rem'
@@ -333,13 +348,11 @@ function ReservationSuccess() {
         boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
       }}>
         <div style={{ fontSize: '6rem', marginBottom: '1rem' }}>✅</div>
-
         <h1 style={{ color: '#28a745', marginBottom: '1rem', fontSize: '2.5rem' }}>
           {isCashPayment ? 'Réservation confirmée !' : 'Paiement réussi !'}
         </h1>
-
         <p style={{ color: '#666', fontSize: '1.2rem', marginBottom: '2rem' }}>
-          {isCashPayment 
+          {isCashPayment
             ? 'Votre réservation a été enregistrée avec succès'
             : 'Votre paiement a été accepté et votre réservation est confirmée'
           }
@@ -356,38 +369,45 @@ function ReservationSuccess() {
             <h2 style={{ color: '#2c5aa0', marginBottom: '1.5rem', textAlign: 'center' }}>
               Récapitulatif
             </h2>
+            
             <div style={{ marginBottom: '1rem' }}>
               <strong style={{ color: '#2c5aa0' }}>Client :</strong>
               <p style={{ margin: '0.5rem 0', color: '#333' }}>
                 {reservationInfo.prenom} {reservationInfo.nom}
               </p>
             </div>
+
             <div style={{ marginBottom: '1rem' }}>
               <strong style={{ color: '#2c5aa0' }}>Email :</strong>
               <p style={{ margin: '0.5rem 0', color: '#333' }}>{reservationInfo.email}</p>
             </div>
+
             <div style={{ marginBottom: '1rem' }}>
               <strong style={{ color: '#2c5aa0' }}>Téléphone :</strong>
               <p style={{ margin: '0.5rem 0', color: '#333' }}>{reservationInfo.telephone}</p>
             </div>
+
             {reservationInfo.adresse && (
               <div style={{ marginBottom: '1rem' }}>
                 <strong style={{ color: '#2c5aa0' }}>Adresse :</strong>
                 <p style={{ margin: '0.5rem 0', color: '#333' }}>{reservationInfo.adresse}</p>
               </div>
             )}
+
             <div style={{ marginBottom: '1rem' }}>
               <strong style={{ color: '#2c5aa0' }}>Date et heure :</strong>
               <p style={{ margin: '0.5rem 0', color: '#333', fontSize: '1.1rem' }}>
                 {reservationInfo.date} à {reservationInfo.heure}
               </p>
             </div>
+
             <div style={{ marginBottom: '1rem' }}>
               <strong style={{ color: '#2c5aa0' }}>Formule :</strong>
               <p style={{ margin: '0.5rem 0', color: '#333' }}>
                 {reservationInfo.formule} (50€)
               </p>
             </div>
+
             {reservationInfo.options && reservationInfo.options.length > 0 && (
               <div style={{ marginBottom: '1rem' }}>
                 <strong style={{ color: '#2c5aa0' }}>Options :</strong>
@@ -396,6 +416,7 @@ function ReservationSuccess() {
                 </p>
               </div>
             )}
+
             <div style={{
               marginTop: '1.5rem',
               padding: '1rem',
@@ -406,7 +427,7 @@ function ReservationSuccess() {
               fontSize: '1.3rem',
               fontWeight: 'bold'
             }}>
-              {isCashPayment 
+              {isCashPayment
                 ? `À payer sur place : ${reservationInfo.prixTotal}€`
                 : `Total payé : ${reservationInfo.prixTotal}€`
               }
@@ -425,7 +446,7 @@ function ReservationSuccess() {
             Un email de confirmation a été envoyé à <strong>{reservationInfo?.email}</strong>
             {isCashPayment && (
               <>
-                <br /><strong>N'oubliez pas :</strong> Le paiement de {reservationInfo?.prixTotal}€ 
+                <br /><strong>N'oubliez pas :</strong> Le paiement de {reservationInfo?.prixTotal}€
                 sera à effectuer sur place.
               </>
             )}
