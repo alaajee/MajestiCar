@@ -225,6 +225,7 @@ function reserverBronze() {
         prenom: formData.prenom,
         email: formData.email,
         telephone: formData.telephone,
+        adresse: formData.adresse,  // ✅ AJOUTÉ ICI
         date: moment(selectedDate).format("DD/MM/YYYY"),
         dateISO: selectedDate.toISOString(),
         heure: selectedTime,
