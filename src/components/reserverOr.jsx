@@ -164,15 +164,17 @@ function reserverOr() {
         prenom: formData.prenom,
         email: formData.email,
         telephone: formData.telephone,
-        adresse: formData.adresse,
-        date: moment(selectedDate).format('DD/MM/YYYY'),
+        adresse: formData.adresse,  // ← AJOUTER CETTE LIGNE
+        date: moment(selectedDate).format("DD/MM/YYYY"),
         dateISO: selectedDate.toISOString(),
         heure: selectedTime,
+        formule: "Or",  // ← CORRIGER : "Or" au lieu de "Bronze"
         options: selectedOptions,
         optionsTexte: optionsTexte,
-        formule: 'Bronze',
         prixTotal: prixTotal,
-        paymentMethod: 'cash'
+        status: "pending",
+        paymentMethod: "stripe",
+        createdAt: new Date().toISOString()
       };
   
       navigate(`/reservation-success?data=${encodeURIComponent(JSON.stringify(reservationData))}&payment=cash`);

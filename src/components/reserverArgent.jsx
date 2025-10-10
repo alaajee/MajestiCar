@@ -167,17 +167,18 @@ function reserverArgent() {
         prenom: formData.prenom,
         email: formData.email,
         telephone: formData.telephone,
-        adresse: formData.adresse,
-        date: moment(selectedDate).format('DD/MM/YYYY'),
+        adresse: formData.adresse,  
+        date: moment(selectedDate).format("DD/MM/YYYY"),
         dateISO: selectedDate.toISOString(),
         heure: selectedTime,
+        formule: "Argent",  
         options: selectedOptions,
         optionsTexte: optionsTexte,
-        formule: 'Bronze',
         prixTotal: prixTotal,
-        paymentMethod: 'cash'
+        status: "pending",
+        paymentMethod: "stripe",
+        createdAt: new Date().toISOString()
       };
-  
       navigate(`/reservation-success?data=${encodeURIComponent(JSON.stringify(reservationData))}&payment=cash`);
   
     } catch (error) {
