@@ -159,21 +159,22 @@ function reserverBronze() {
         : 'Aucune option supplémentaire';
   
       await ajouterReservation(selectedDate, selectedTime, 'Bronze');
-  
       const reservationData = {
         nom: formData.nom,
         prenom: formData.prenom,
         email: formData.email,
         telephone: formData.telephone,
-        adresse: formData.adresse,
-        date: moment(selectedDate).format('DD/MM/YYYY'),
+        adresse: formData.adresse,  
+        date: moment(selectedDate).format("DD/MM/YYYY"),
         dateISO: selectedDate.toISOString(),
         heure: selectedTime,
+        formule: "Bronze",
         options: selectedOptions,
         optionsTexte: optionsTexte,
-        formule: 'Bronze',
         prixTotal: prixTotal,
-        paymentMethod: 'cash'
+        status: "pending",
+        paymentMethod: "stripe",
+        createdAt: new Date().toISOString()
       };
   
       navigate(`/reservation-success?data=${encodeURIComponent(JSON.stringify(reservationData))}&payment=cash`);
