@@ -241,7 +241,7 @@ function reserverBronze() {
       sessionStorage.setItem('stripe_pending_reservation', pendingId);
       sessionStorage.setItem('stripe_pending_email', formData.email);
   
-      const paymentLinkBase = "https://buy.stripe.com/test_eVq00ldio4SNaHt3lM1oI02";
+      const paymentLinkBase = "https://buy.stripe.com/test_6oU5kFdiofxrdTF3lM1oI05";
       const paymentUrl = `${paymentLinkBase}?prefilled_email=${encodeURIComponent(formData.email)}`;
       
       window.location.href = paymentUrl;
@@ -802,6 +802,19 @@ function reserverBronze() {
 
             {/* BOUTONS */}
             {paymentMethod === "stripe" && (
+            <>
+              <div style={{
+                padding: "0.75rem",
+                background: "#fff3cd",
+                border: "2px solid #ffc107",
+                borderRadius: "8px",
+                marginBottom: "1rem",
+                fontSize: "0.85rem",
+                color: "#856404"
+              }}>
+                ⚠️ <strong>Important :</strong> Sur la page de paiement Stripe, vous devrez resélectionner vos options supplémentaires pour payer le montant total.
+              </div>
+              
               <button
                 onClick={handleStripePayment}
                 disabled={loading}
@@ -819,9 +832,9 @@ function reserverBronze() {
               >
                 {loading ? "Redirection..." : `💳 Payer ${calculerPrixTotal()}€`}
               </button>
-            )}
-
-            {paymentMethod === "cash" && (
+            </>
+          )}
+                      {paymentMethod === "cash" && (
               <button
                 onClick={handleCashPayment}
                 disabled={loading}

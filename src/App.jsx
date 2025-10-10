@@ -4,7 +4,6 @@ import image2 from './assets/logov2.jpg'
 import picture1 from './assets/picture1.jpeg'
 import picture2 from './assets/picture2.jpeg'
 import picture3 from './assets/picture3.jpeg'
-import picture4 from './assets/picture4.jpeg'
 import video1 from './assets/vid1.mp4'
 import video2 from './assets/vid2.mp4'
 import video3 from './assets/vid3.mp4'
@@ -115,10 +114,14 @@ function App() {
       </header>
       <div className="Photo">
         <img src={image1} alt="A beautiful scenery" />
+        <div style={{position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center'}}>
         <div className="image-slogan">
-          Votre voiture, notre soin, partout avec Majesti'Car.
+          MAJESTI'CAR
         </div>
-
+        <div className="image-slogan">
+          DETAILING AUTOMOBILE PREMIUM
+        </div>
+      </div>
         <div className="Mes_services">
           <button onClick={scrollToServices} className='Button_services'>
             Voir nos services
@@ -138,13 +141,12 @@ function App() {
         ✅ Detailing complet intérieur – nettoyage en profondeur des tissus, soin des surfaces, finitions haut de gamme<br />
         ✅ Lavage extérieur avec shampoing – carrosserie éclatante, jantes impeccables, rendu professionnel.<br />
 
-
         Un service pratique, écologique et 100 % mobile.
         Majesticar, la qualité du lavage professionnel, directement chez vous. 🚗💨
 
        
       </p>
-    </div>
+      </div>
 
           
       <ProfessionalServices />
@@ -154,7 +156,7 @@ function App() {
           
             <div className="service bronze">
                 <h3>Formule Bronze</h3>
-                <div className="price">40€</div>
+                <div className="price">50€</div>
                 <ul className="features">
                     <li>Aspiration complète de l'habitacle</li>
                     <li>Traitement des plastiques et tableau de bord</li>
@@ -169,7 +171,7 @@ function App() {
 
             <div className="service argent">
                 <h3>Formule Argent</h3>
-                <div className="price">80€</div>
+                <div className="price">90€</div>
                 <ul className="features">
                     <li>Aspiration complète de l'habitacle</li>
                     <li>Traitement des plastiques et tableau de bord</li>
@@ -189,7 +191,7 @@ function App() {
 
             <div className="service or">
                 <h3>Formule Or</h3>
-                <div className="price">120€</div>
+                <div className="price">130€</div>
                 <ul className="features">
                     <li>Aspiration complète de l'habitacle</li>
                     <li>Traitement des plastiques et tableau de bord</li>
@@ -211,7 +213,7 @@ function App() {
 
         {/* Section Galerie Photos */}
         <div className="gallery-section">
-          <h1 className="gallery-title">Notre Galerie</h1>
+          <h1 className="gallery-title">Galerie</h1>
           <p className="gallery-subtitle">Notre qualité à votre service</p>
           
           <div className="gallery-carousel">
@@ -229,10 +231,13 @@ function App() {
             <video 
               src={allMedia[currentImageIndex].src} 
               className="gallery-image"
-              controls
               autoPlay
               muted
               loop
+              playsInline
+              disablePictureInPicture
+              controlsList="nodownload nofullscreen noremoteplayback"
+              style={{ pointerEvents: 'none' }}
             />
           )}
         </div>
