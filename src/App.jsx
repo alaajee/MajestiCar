@@ -260,7 +260,7 @@ function App() {
         <footer className="footer-section">
         <div className="footer-container">
           {/* Section Contact */}
-          <div className="footer-contact">
+          <div className="footer-contact" useRef={contactRef}>
             <h2>Contactez-nous</h2>
             <p>
               <strong>Téléphone :</strong> <a href="tel:+336 74 14 07 46" className="footer-phone">+212 6 12 34 56 78</a>
