@@ -114,14 +114,12 @@ function App() {
       </header>
       <div className="Photo">
         <img src={image1} alt="A beautiful scenery" />
-        <div style={{position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center'}}>
+        
         <div className="image-slogan">
-          MAJESTI'CAR
-        </div>
-        <div className="image-slogan">
+          MAJESTI'CAR <br/>
+        
           DETAILING AUTOMOBILE PREMIUM
         </div>
-      </div>
         <div className="Mes_services">
           <button onClick={scrollToServices} className='Button_services'>
             Voir nos services
