@@ -246,7 +246,7 @@ function reserverArgent() {
       sessionStorage.setItem('stripe_pending_reservation', pendingId);
       sessionStorage.setItem('stripe_pending_email', formData.email);
   
-      const paymentLinkBase = "https://buy.stripe.com/test_6oU5kFdiofxrdTF3lM1oI05";
+      const paymentLinkBase = "https://buy.stripe.com/7sY4gz8hJ1c22Hi2qq8bS04";
       const paymentUrl = `${paymentLinkBase}?prefilled_email=${encodeURIComponent(formData.email)}`;
       
       window.location.href = paymentUrl;
