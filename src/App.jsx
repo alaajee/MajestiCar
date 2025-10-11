@@ -4,7 +4,7 @@ import image2 from './assets/logov2.jpg'
 import picture1 from './assets/picture1.jpeg'
 import picture2 from './assets/picture2.jpeg'
 import picture3 from './assets/picture3.jpeg'
-import photo from './assets/photodeprofil.jpg'
+import photo from './assets/BMW_M5_2017_d3dd0.jpg'
 import video1 from './assets/vid1.mp4'
 import video2 from './assets/vid2.mp4'
 import video3 from './assets/vid3.mp4'
@@ -65,7 +65,7 @@ function App() {
     if (allMedia[currentImageIndex].type === 'image') {
       autoPlayRef.current = setTimeout(() => {
         nextImage();
-      }, 100000); // 5 secondes par image
+      }, 10000); // 5 secondes par image
     }
     // Si c'est une vidéo, on ne fait rien (géré par onEnded)
     
