@@ -4,6 +4,7 @@ import image2 from './assets/logov2.jpg'
 import picture1 from './assets/picture1.jpeg'
 import picture2 from './assets/picture2.jpeg'
 import picture3 from './assets/picture3.jpeg'
+import photo from './assets/photodeprofil.jpg'
 import video1 from './assets/vid1.mp4'
 import video2 from './assets/vid2.mp4'
 import video3 from './assets/vid3.mp4'
@@ -47,21 +48,40 @@ function App() {
     ...carouselImages.map(src => ({ type: 'image', src })),
     ...carouselVideos.map(src => ({ type: 'video', src }))
   ];
+  
+  // Fonction pour passer à l'image suivante
+  // Fonction pour passer à l'image suivante
+  // Fonction pour passer à l'image suivante
+  const autoPlayRef = useRef(null);
 
-  // Fonction pour passer à l'image suivante
-  // Fonction pour passer à l'image suivante
-// Fonction pour passer à l'image suivante
+
+  // Relancer l'autoplay quand l'index change
+  useEffect(() => {
+    if (autoPlayRef.current) {
+      clearTimeout(autoPlayRef.current);
+    }
+  
+    // Si c'est une image, on utilise un timer
+    if (allMedia[currentImageIndex].type === 'image') {
+      autoPlayRef.current = setTimeout(() => {
+        nextImage();
+      }, 100000); // 5 secondes par image
+    }
+    // Si c'est une vidéo, on ne fait rien (géré par onEnded)
+    
+    return () => {
+      if (autoPlayRef.current) {
+        clearTimeout(autoPlayRef.current);
+      }
+    };
+  }, [currentImageIndex]);
+  // Navigation
   const nextImage = () => {
-    setCurrentImageIndex((prevIndex) => 
-      prevIndex === allMedia.length - 1 ? 0 : prevIndex + 1
-    );
+    setCurrentImageIndex((prev) => (prev + 1) % allMedia.length);
   };
 
-  // Fonction pour passer à l'image précédente
   const prevImage = () => {
-    setCurrentImageIndex((prevIndex) => 
-      prevIndex === 0 ? allMedia.length - 1 : prevIndex - 1
-    );
+    setCurrentImageIndex((prev) => (prev - 1 + allMedia.length) % allMedia.length);
   };
 
   useEffect(() => {
@@ -71,8 +91,6 @@ function App() {
     });
 
     // Auto-play du carrousel
-    const interval = setInterval(nextImage, 5000);
-    return () => clearInterval(interval);
   }, []);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -113,20 +131,22 @@ function App() {
         </div>
       </header>
       <div className="Photo">
-        <img src={image1} alt="A beautiful scenery" />
-        
-        <div className="image-slogan">
-          MAJESTI'CAR <br/>
-        
-          DETAILING AUTOMOBILE PREMIUM
-        </div>
-        <div className="Mes_services">
-          <button onClick={scrollToServices} className='Button_services'>
-            Voir nos services
-          </button>
-        </div> 
-
+      <img src={photo} alt="A beautiful scenery" />
+      
+      <div className="image-title">
+        MAJESTI'CAR
       </div>
+      
+      <div className="image-slogan">
+        DETAILING AUTOMOBILE PREMIUM
+      </div>
+      
+      <div className="Mes_services">
+        <button onClick={scrollToServices} className='Button_services'>
+          Voir nos services
+        </button>
+      </div>
+    </div>
       
       
       <div className="A_propos" ref={AproposRef}>
@@ -219,27 +239,28 @@ function App() {
               ‹
             </button>
             <div className="gallery-image-container">
-          {allMedia[currentImageIndex].type === 'image' ? (
-            <img 
-              src={allMedia[currentImageIndex].src} 
-              alt={`Réalisation ${currentImageIndex + 1}`} 
-              className="gallery-image" 
+            {allMedia[currentImageIndex].type === 'image' ? (
+              <img
+                src={allMedia[currentImageIndex].src}
+                alt={`Réalisation ${currentImageIndex + 1}`}
+                className="gallery-image"
+              />
+            ) : (
+              <video
+                key={currentImageIndex}
+                src={allMedia[currentImageIndex].src}
+                className="gallery-image"
+                autoPlay
+                muted
+                playsInline
+                disablePictureInPicture
+                controlsList="nodownload nofullscreen noremoteplayback"
+                style={{ pointerEvents: 'none' }}
+                onEnded={nextImage} // ← Passe à la suivante quand la vidéo se termine
             />
-          ) : (
-            <video 
-              src={allMedia[currentImageIndex].src} 
-              className="gallery-image"
-              autoPlay
-              muted
-              loop
-              playsInline
-              disablePictureInPicture
-              controlsList="nodownload nofullscreen noremoteplayback"
-              style={{ pointerEvents: 'none' }}
-            />
-          )}
-        </div>
-            <button className="gallery-arrow gallery-arrow-right" onClick={nextImage}>
+            )}
+          </div>
+              <button className="gallery-arrow gallery-arrow-right" onClick={nextImage}>
               ›
             </button>
           </div>
