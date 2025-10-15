@@ -366,13 +366,16 @@ html, body {
 }
 
 /* Media query pour petits écrans (mobile) */
-@media screen and (max-width: 1500px) {
+@media screen and (max-width: 1400px) {
   .top-banner {
     padding: 15px 10px;
   }
   
   .Photo {
     margin-top: 130px;
+  }
+  .Photo img {
+    height: 500px;
   }
   
   .menu-container {
@@ -447,7 +450,7 @@ html, body {
   }
   
   .Mes_services {
-    bottom: 200px;
+    bottom: 100px;
   }
 
   .Button_services {
