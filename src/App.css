@@ -245,9 +245,9 @@ html, body {
 }
 
 .A_propos {
-  padding: 60px 20px;
-  background: linear-gradient(135deg, #f9f9f9 0%, #ffffff 100%);
-  min-height: 800px;
+  padding: 100px 20px;
+  background: white;
+  min-height: 60vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -259,112 +259,108 @@ html, body {
 .A_propos::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: white;
-  animation: rotate 20s linear infinite;
+  top: -30%;
+  right: -15%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(52, 152, 219, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite;
+  pointer-events: none;
 }
 
-@keyframes rotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-30px); }
 }
 
 .A_propos h2 {
-  font-size: 3rem;
-  margin-bottom: 30px;
-  color: white;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  margin-bottom: 50px;
+  color: #2c3e50;
   text-align: center;
   font-weight: 700;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  letter-spacing: -0.5px;
   position: relative;
   z-index: 2;
   background: blue;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  line-height: 1.2;
+  animation: fadeInUp 0.8s ease-out;
 }
 
 .A_propos h2::after {
   content: '';
   position: absolute;
-  bottom: -10px;
+  bottom: -15px;
   left: 50%;
   transform: translateX(-50%);
-  width: 80px;
-  height: 4px;
-  background: white;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #7ec9cf, transparent);
   border-radius: 2px;
 }
 
 .A_propos p {
-  font-size: 1.3rem;
-  line-height: 1.8;
-  color: black;
-  max-width: 900px;
+  font-size: 1.6rem;
+  line-height: 1.9;
+  color: #555;
+  max-width: 850px;
   margin: 0 auto;
-  padding: 40px;
-  background: white;
+  padding: 0;
+  background: transparent;
   border: none;
-  border-radius: 20px;
-  box-shadow: 
-      0 20px 60px rgba(0,0,0,0.1),
-      0 8px 25px rgba(0,0,0,0.1),
-      inset 0 1px 0 rgba(255,255,255,0.8);
-  backdrop-filter: blur(10px);
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
   position: relative;
   z-index: 2;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   text-align: justify;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
 }
 
 .A_propos p::before {
   content: '"';
   position: absolute;
-  top: -10px;
-  left: 20px;
-  font-size: 4rem;
-  color: #7ec9cf;
-  opacity: 0.3;
+  top: -20px;
+  left: -40px;
+  font-size: 3rem;
+  color: #719fc9;
+  opacity: 0.15;
   font-family: serif;
+  font-weight: bold;
 }
 
 .A_propos p::after {
   content: '"';
   position: absolute;
-  bottom: -20px;
-  right: 30px;
-  font-size: 4rem;
+  bottom: -25px;
+  right: -40px;
+  font-size: 5rem;
   color: #7ec9cf;
-  opacity: 0.3;
+  opacity: 0.15;
   font-family: serif;
+  font-weight: bold;
 }
 
 .A_propos p:hover {
-  transform: translateY(-5px);
-  box-shadow: 
-      0 25px 70px rgba(0,0,0,0.15),
-      0 12px 35px rgba(0,0,0,0.1),
-      inset 0 1px 0 rgba(255,255,255,0.9);
-}
-
-.A_propos {
-  animation: fadeInUp 1s ease-out;
+  transform: none;
+  color: #3a4a5c;
 }
 
 @keyframes fadeInUp {
   from {
-      opacity: 0;
-      transform: translateY(30px);
+    opacity: 0;
+    transform: translateY(30px);
   }
   to {
-      opacity: 1;
-      transform: translateY(0);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
-
 /* Media query pour petits écrans (mobile) */
 @media screen and (max-width: 1400px) {
   .top-banner {

@@ -152,15 +152,11 @@ function App() {
       <div className="A_propos" ref={AproposRef}>
       <h2>À propos de Majesti'Car</h2>
       <p>
-        Majesti’Car, votre station de lavage automobile mobile premium 🚐✨
-        Autonome en électricité et en eau, nous venons directement à vous pour redonner à votre véhicule toute sa brillance. 💧 <br/>
+      Majesti’Car, votre station de lavage automobile mobile premium.
 
-        📍 Nos services :<br />
-        ✅ Detailing complet intérieur – nettoyage en profondeur des tissus, soin des surfaces, finitions haut de gamme<br />
-        ✅ Lavage extérieur avec shampoing – carrosserie éclatante, jantes impeccables, rendu professionnel.<br />
+      Autonome en électricité et en eau, nous venons directement à vous pour redonner à votre véhicule toute sa brillance.
 
-        Un service pratique, écologique et 100 % mobile.
-        Majesticar, la qualité du lavage professionnel, directement chez vous. 🚗💨
+      Un service pratique, écologique et 100 % mobile. Majesti’Car, la qualité du lavage professionnel, directement chez vous.
 
        
       </p>
